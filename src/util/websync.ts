@@ -31,7 +31,9 @@ const saveSync = (authed: boolean) => {
 let lastTimeout: number | undefined;
 
 export const forceWebsync = (authed: boolean) => {
-  if (IS_MOCKED_CLIENT || IS_TAURI) return undefined;
+  // Greengram: t.me's sign-in sync belongs to Telegram, never load it
+  const isGreengram = true;
+  if (IS_MOCKED_CLIENT || IS_TAURI || isGreengram) return undefined;
   const currentTs = getTs();
 
   const { canRedirect, ts } = JSON.parse(localStorage.getItem(WEBSYNC_KEY) || '{}');

@@ -1,6 +1,7 @@
 import { Mutex } from 'async-mutex';
 
 import { concat } from '../../../util/encoding/buffer';
+import { greengramSocketURL } from '../greengram';
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 3000;
@@ -78,12 +79,9 @@ export default class PromisedWebSockets {
     return toReturn;
   }
 
+  // Greengram: every DC is the server that served the page
   getWebSocketLink(ip: string, port: number, isTestServer?: boolean, isPremium?: boolean) {
-    if (port === 443) {
-      return `wss://${ip}:${port}/apiws${isTestServer ? '_test' : ''}${isPremium ? '_premium' : ''}`;
-    } else {
-      return `ws://${ip}:${port}/apiws${isTestServer ? '_test' : ''}${isPremium ? '_premium' : ''}`;
-    }
+    return greengramSocketURL();
   }
 
   connect(port: number, ip: string, isTestServer = false, isPremium = false) {

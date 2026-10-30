@@ -8,6 +8,7 @@ import type { TwoFaParams } from '../../../lib/gramjs/client/2fa';
 import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
 import { RPCError } from '../../../lib/gramjs/errors';
 import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
+import { loadGreengramInstance } from '../../../lib/gramjs/greengram';
 
 import type { ThreadId } from '../../../types';
 import type {
@@ -102,7 +103,24 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
     hasPasskeySupport, webAuthUserId,
   } = initialArgs;
 
-  const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
+  // Greengram: the instance's RSA key and DC, before anything connects
+  let greengramDc: number | undefined;
+  try {
+    greengramDc = (await loadGreengramInstance()).dc;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err);
+    sendApiUpdate({
+      '@type': 'updateConnectionState',
+      connectionState: 'connectionStateBroken',
+    });
+    return;
+  }
+
+  // a session the old server left points at its DC 1: start over, the web
+  // token signs it back in
+  const stale = sessionData && greengramDc && sessionData.mainDcId !== greengramDc;
+  const session = new sessions.CallbackSession(stale ? undefined : sessionData, onSessionUpdate);
 
   (self as any).isWebmSupported = isWebmSupported;
 
@@ -119,9 +137,11 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
       useWSS: true,
       additionalDcsDisabled: IS_TEST,
       shouldDebugExportedSenders,
-      shouldForceHttpTransport,
-      shouldAllowHttpTransport,
-      dcId,
+      // the server only speaks WebSocket; the HTTP fallback got 405 and
+      // left the tab retrying until a reload
+      shouldForceHttpTransport: false,
+      shouldAllowHttpTransport: false,
+      dcId: dcId || greengramDc,
       langPack: LANG_PACK,
       langCode,
       systemLangCode: navigator.language,
@@ -716,11 +736,13 @@ export async function repairWebPageMedia(url: string) {
 }
 
 export function setForceHttpTransport(forceHttpTransport: boolean) {
-  client.setForceHttpTransport(forceHttpTransport);
+  client.setForceHttpTransport(false); // WebSocket only, see init
+  void forceHttpTransport;
 }
 
 export function setAllowHttpTransport(allowHttpTransport: boolean) {
-  client.setAllowHttpTransport(allowHttpTransport);
+  client.setAllowHttpTransport(false);
+  void allowHttpTransport;
 }
 
 export function setShouldDebugExportedSenders(value: boolean) {

@@ -132,6 +132,18 @@ function onUpdateApiReady<T extends GlobalState>(global: T) {
   void retryLocalization(selectSharedSettings(global).language);
 }
 
+// Greengram: sign-in lives on the instance's /login page. The worker only
+// asks for a phone number when the browser has no session; send people
+// there, at most once a minute so a broken session can't loop.
+function openGreengramLogin() {
+  const KEY = 'greengram-login-redirect';
+  const last = Number(sessionStorage.getItem(KEY)) || 0;
+  if (Date.now() - last < 60000) return;
+  sessionStorage.setItem(KEY, String(Date.now()));
+  const slot = new URLSearchParams(window.location.search).get('account');
+  window.location.replace(`/login?next=chat${slot ? `&account=${encodeURIComponent(slot)}` : ''}`);
+}
+
 function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationState) {
   const wasAuthReady = global.auth.state === 'authorizationStateReady';
   const authState = update.authorizationState;
@@ -144,6 +156,10 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
   global = getGlobal();
 
   switch (authState) {
+    case 'authorizationStateWaitPhoneNumber':
+    case 'authorizationStateWaitQrCode':
+      openGreengramLogin();
+      break;
     case 'authorizationStateLoggingOut':
       void forceWebsync(false);
 
@@ -179,6 +195,7 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
       setGlobal(global);
       break;
     case 'authorizationStateReady': {
+      sessionStorage.removeItem('greengram-login-redirect');
       if (wasAuthReady) {
         break;
       }

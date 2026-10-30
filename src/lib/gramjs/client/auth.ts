@@ -13,6 +13,7 @@ import {
 } from '../errors';
 import Api from '../tl/api';
 
+import { greengramWebToken } from '../greengram';
 import { sleep } from '../Helpers';
 import { computeCheck as computePasswordSrpCheck } from '../Password';
 import { getDisplayName } from '../Utils';
@@ -61,10 +62,31 @@ export async function authFlow(
   } else if ('webAuthToken' in authParams && authParams.webAuthToken) {
     me = await signInUserWithWebToken(client, apiCredentials, authParams);
   } else {
-    me = await signInUserWithPreferredMethod(client, apiCredentials, authParams);
+    // Greengram: people sign in on the instance's /login page; the phone
+    // screen below only shows when there is no session, and the page
+    // sends them there (see onUpdateAuthorizationState)
+    me = await signInWithGreengramSession(client) ?? await signInUser(client, apiCredentials, authParams);
   }
 
   client._log.info(`Signed in successfully as ${getDisplayName(me)}`);
+}
+
+// The apps' way in: the HTTPS session goes into auth.importAuthorization,
+// which binds this auth key to it.
+async function signInWithGreengramSession(client: TelegramClient): Promise<Api.TypeUser | undefined> {
+  try {
+    const session = await greengramWebToken();
+    if (!session) return undefined;
+    const result = await client.invoke(new Api.auth.ImportAuthorization({
+      id: BigInt(session.userId),
+      bytes: new TextEncoder().encode(session.token),
+    }));
+    return result instanceof Api.auth.Authorization ? result.user : undefined;
+  } catch (err: unknown) {
+    // signed out meanwhile, or the server refused: fall back to /login
+    client._log.error(`Greengram session sign-in failed: ${String(err)}`);
+    return undefined;
+  }
 }
 
 export function signInUserWithPreferredMethod(

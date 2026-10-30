@@ -187,11 +187,13 @@ const App = ({
     activeKey = AppScreens.auth;
   }
 
+  // Greengram: sign-in happens on the instance's /login page, and the
+  // worker sends a signed-out browser there (see onUpdateAuthorizationState).
+  // The QR screen only ever flashed while the session cookie was being
+  // turned into an auth key, so show the loading main screen instead.
   if (activeKey !== AppScreens.lock
     && activeKey !== AppScreens.inactive
-    && activeKey !== AppScreens.main
-    && getPendingWebLogin()
-    && !hasWebAuthTokenFailed) {
+    && activeKey !== AppScreens.main) {
     page = 'main';
     activeKey = AppScreens.main;
   }

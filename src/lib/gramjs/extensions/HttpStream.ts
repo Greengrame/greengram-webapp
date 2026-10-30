@@ -1,4 +1,5 @@
 import { concat } from '../../../util/encoding/buffer';
+import { greengramOrigin } from '../greengram';
 
 const closeError = new Error('HttpStream was closed');
 const REQUEST_TIMEOUT = 30000;
@@ -68,12 +69,10 @@ export default class HttpStream {
     return data;
   }
 
+  // Greengram: same origin; the server has no HTTP transport yet, so this
+  // fallback fails fast instead of reaching Telegram
   static getURL(ip: string, port: number, isTestServer?: boolean, isPremium?: boolean) {
-    if (port === 443) {
-      return `https://${ip}:${port}/apiw1${isTestServer ? '_test' : ''}${isPremium ? '_premium' : ''}`;
-    } else {
-      return `http://${ip}:${port}/apiw1${isTestServer ? '_test' : ''}${isPremium ? '_premium' : ''}`;
-    }
+    return `${greengramOrigin()}/apiw1`;
   }
 
   connect(port: number, ip: string, isTestServer = false, isPremium = false) {

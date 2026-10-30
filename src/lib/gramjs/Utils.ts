@@ -212,8 +212,14 @@ export function getDC(dcId: number, downloadDC = false) {
         ipAddress: `zws5${downloadDC ? '-1' : ''}.web.telegram.org`,
         port: 443,
       };
+    // Greengram: the address is never dialed (see greengramSocketURL), any
+    // DC number the instance uses is fine
     default:
-      throw new Error(`Cannot find the DC with the ID of ${dcId}`);
+      return {
+        id: dcId,
+        ipAddress: self.location.hostname,
+        port: 443,
+      };
   }
   // TODO chose based on current connection method
   /*
