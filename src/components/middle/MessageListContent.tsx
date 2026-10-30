@@ -25,11 +25,9 @@ import { getPeerTitle } from '../../global/helpers/peers';
 import { getMessageForumTopicId, isMessageInForumTopic } from '../../global/helpers/replies';
 import { selectChatMessage, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatHumanDate, formatScheduledDateTime } from '../../util/dates/oldDateFormat';
 import { isUserId } from '../../util/entities/ids';
-import { convertTonFromNanos } from '../../util/formatCurrency';
 import { compact } from '../../util/iteratees';
-import { formatMessageListDate } from '../../util/localization/dateFormat';
+import { formatCalendarDate, formatMessageListDate, secondsToDate } from '../../util/localization/dateFormat';
 import { formatStarsAsText, formatTonAsText } from '../../util/localization/format';
 import { isAlbum, isDocumentGroup } from './helpers/groupMessages';
 import { consumePendingTopGrowth } from './helpers/messageListReserves';
@@ -39,7 +37,6 @@ import { renderPeerLink } from './message/helpers/messageActions';
 import useDerivedSignal from '../../hooks/useDerivedSignal';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import useMessageObservers from './hooks/useMessageObservers';
 import useScrollHooks from './hooks/useScrollHooks';
@@ -245,12 +242,11 @@ const MessageListContent = ({
     onScrollDownToggle,
   });
 
-  const oldLang = useOldLang();
   const lang = useLang();
 
   const unreadDivider = (
     <div className={buildClassName(UNREAD_DIVIDER_CLASS, 'local-action-message')} key="unread-messages">
-      <span>{oldLang('UnreadMessages')}</span>
+      <span>{lang('UnreadMessages')}</span>
     </div>
   );
   const renderPaidMessageAction = (message: ApiMessage, album?: IAlbum) => {
@@ -304,11 +300,11 @@ const MessageListContent = ({
 
       const tableData: TableEntry[] = compact([
         [lang('TitlePrice'), price ? (price.currency === 'TON'
-          ? formatTonAsText(lang, convertTonFromNanos(price.amount))
+          ? formatTonAsText(lang, price.amount)
           : formatStarsAsText(lang, price.amount)) : lang('SuggestMessageNoPrice')],
         [lang('TitleTime'),
           scheduleDate
-            ? formatScheduledDateTime(scheduleDate, lang, oldLang)
+            ? formatCalendarDate(lang, secondsToDate(scheduleDate), { isShort: true, withTime: true })
             : lang('SuggestMessageAnytime'),
         ],
       ]);
@@ -565,7 +561,7 @@ const MessageListContent = ({
         isThreadTopMessage && (
           <div className="local-action-message" key={`discussion-started-${lastMessageId}`}>
             <span>
-              {oldLang(isEmptyThread
+              {lang(isEmptyThread
                 ? (isComments ? 'NoComments' : 'NoReplies') : 'DiscussionStarted')}
             </span>
           </div>
@@ -584,10 +580,12 @@ const MessageListContent = ({
       >
         <span dir="auto">
           {isSchedule && dateGroup.originalDate === SCHEDULED_WHEN_ONLINE && (
-            oldLang('MessageScheduledUntilOnline')
+            lang('MessageScheduledUntilOnline')
           )}
           {isSchedule && dateGroup.originalDate !== SCHEDULED_WHEN_ONLINE && (
-            oldLang('MessageScheduledOn', formatHumanDate(oldLang, dateGroup.datetime, undefined, true))
+            lang('MessageScheduledOn', {
+              date: formatCalendarDate(lang, new Date(dateGroup.datetime), { variant: 'absolute' }),
+            })
           )}
           {!isSchedule && formatMessageListDate(lang, new Date(dateGroup.datetime))}
         </span>

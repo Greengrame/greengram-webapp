@@ -121,6 +121,7 @@ import type {
   ThreadId,
 } from '../../types';
 import type { BrowserState } from '../../types/browser';
+import type { RegularLangKey } from '../../types/language';
 import type { SearchResultKey } from '../../util/keys/searchResultKey';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ProfileCollectionKey } from '../selectors/payments';
@@ -544,6 +545,7 @@ export type TabState = {
       field?: string;
       messageKey?: RegularLangFnParameters;
       descriptionKey?: RegularLangFnParameters;
+      description?: string;
     };
     isPaymentModalOpen?: boolean;
     isExtendedMedia?: boolean;
@@ -562,9 +564,8 @@ export type TabState = {
   };
 
   priceConfirmModal?: {
-    originalAmount?: number;
-    newAmount?: number;
-    currency: 'TON' | 'XTR';
+    originalAmount: ApiTypeCurrencyAmount;
+    newAmount: ApiTypeCurrencyAmount;
     directInfo?: {
       formId: string;
       inputInvoice: ApiInputInvoice;
@@ -573,7 +574,7 @@ export type TabState = {
 
   chatCreation?: {
     progress: ChatCreationProgress;
-    error?: string;
+    error?: RegularLangKey;
   };
 
   profileEdit?: {
@@ -1004,7 +1005,7 @@ export type TabState = {
   walletModal?: {
     shouldOpenTonConnect?: boolean;
     initialRecipient?: string;
-    initialAmount?: number;
+    initialAmount?: bigint;
     initialComment?: string;
     isInitialCommentEncrypted?: boolean;
     shouldCloseAfterSend?: boolean;
@@ -1045,7 +1046,7 @@ export type TabState = {
     // See `buildWalletTransferFeeKey`
     key?: string;
     // Nanotons
-    fee?: number;
+    fee?: bigint;
     canEncryptComment?: boolean;
     canUseRelayer?: boolean;
     isLoading?: boolean;

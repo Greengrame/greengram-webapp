@@ -31,13 +31,12 @@ import {
 } from '../../../global/selectors';
 import { selectThreadIdFromMessage } from '../../../global/selectors/threads';
 import { ensureProtocol } from '../../../util/browser/url';
+import { formatCountdown, formatShortDuration } from '../../../util/dates/duration';
+import { formatCurrency, formatTonFromNanos, formatTonInFiat } from '../../../util/formatCurrency';
+import { formatCalendarDate, formatDateTime, secondsToDate } from '../../../util/localization/dateFormat';
 import {
-  formatCountdown, formatDateTimeToString, formatScheduledDateTime, formatShortDuration,
-} from '../../../util/dates/oldDateFormat';
-import {
-  convertTonFromNanos, formatCurrency, formatTonFromNanos, formatTonInFiat,
-} from '../../../util/formatCurrency';
-import { formatCurrencyAmountAsText, formatStarsAsText, formatTonAsText } from '../../../util/localization/format';
+  formatCurrencyAmountAsText, formatStarsAsText, formatTonAsIcon, formatTonAsText,
+} from '../../../util/localization/format';
 import { conjuctionWithNodes } from '../../../util/localization/utils';
 import { getServerTime } from '../../../util/serverTime';
 import renderText from '../../common/helpers/renderText';
@@ -53,7 +52,6 @@ import {
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import CustomEmoji from '../../common/CustomEmoji';
 import TopicDefaultIcon from '../../common/TopicDefaultIcon';
@@ -102,7 +100,6 @@ const ActionMessageText = ({
   const action = message.content.action!;
 
   const lang = useLang();
-  const oldLang = useOldLang();
 
   function renderStrong(text: TeactNode) {
     if (asPreview) return text;
@@ -495,9 +492,7 @@ const ActionMessageText = ({
         const amount = renderStrong(
           lang('GramAmountText', { amount: groupedAmount }, { pluralValue: Number(formattedAmount) }),
         );
-        const fiat = formatTonInFiat(
-          action.amount, tonUsdRate, walletCurrency!, walletCurrencyRate, lang.code, { isInNanos: true },
-        );
+        const fiat = formatTonInFiat(action.amount, tonUsdRate, walletCurrency!, walletCurrencyRate, lang.code);
         const worth = fiat ? `${NBSP}${lang('ActionGramTransferWorth', { fiat })}` : '';
 
         // The service chat reports transfers from senders the server does not name, so the text names no sender
@@ -525,8 +520,8 @@ const ActionMessageText = ({
         } = action;
 
         const price = formatCurrency(lang, amount, currency, { asFontIcon: true });
-        const cryptoPrice = cryptoAmount && type !== 'giftTon'
-          ? formatCurrency(lang, cryptoAmount, cryptoCurrency!) : undefined;
+        const cryptoPrice = cryptoAmount && cryptoCurrency === TON_CURRENCY_CODE && type !== 'giftTon'
+          ? formatTonAsIcon(lang, cryptoAmount) : undefined;
 
         const cost = cryptoPrice ? lang('ActionGiftCostCrypto', { price, cryptoPrice }, { withNodes: true }) : price;
 
@@ -561,7 +556,7 @@ const ActionMessageText = ({
 
       case 'groupCallScheduled': {
         const { scheduleDate } = action;
-        const formattedDate = formatDateTimeToString(scheduleDate * 1000, lang.code, true);
+        const formattedDate = formatDateTime(lang, secondsToDate(scheduleDate), { date: 'short', time: 'short' });
 
         if (isChannel) return lang('ActionGroupCallScheduledChannel', { date: formattedDate });
         return lang('ActionGroupCallScheduledGroup', { from: senderLink, date: formattedDate }, { withNodes: true });
@@ -952,16 +947,14 @@ const ActionMessageText = ({
 
       case 'suggestedPostSuccess': {
         const { amount: price } = action;
-        const currency = price?.currency || STARS_CURRENCY_CODE;
-        const amount = price?.amount || 0;
 
         const channel = chat?.isMonoforum ? selectMonoforumChannel(global, chatId) : chat;
         const channelTitle = channel && getPeerTitle(lang, channel);
         const channelLink = renderPeerLink(channel?.id, channelTitle || channelFallbackText, asPreview);
 
-        const formattedAmount = currency === TON_CURRENCY_CODE
-          ? formatTonAsText(lang, convertTonFromNanos(amount))
-          : formatStarsAsText(lang, amount);
+        const formattedAmount = price?.currency === TON_CURRENCY_CODE
+          ? formatTonAsText(lang, price.amount)
+          : formatStarsAsText(lang, price?.amount || 0);
 
         return lang('ActionSuggestedPostSuccess', {
           channel: channelLink,
@@ -976,16 +969,14 @@ const ActionMessageText = ({
         const postSenderLink = renderPeerLink(postSender?.id, postSenderTitle || userFallbackText, asPreview);
 
         const price = replyMessage?.suggestedPostInfo?.price;
-        const currency = price?.currency || STARS_CURRENCY_CODE;
-        const amount = price?.amount || 0;
 
         const channel = chat?.isMonoforum ? selectMonoforumChannel(global, chatId) : chat;
         const channelTitle = channel && getPeerTitle(lang, channel);
         const channelLink = renderPeerLink(channel?.id, channelTitle || channelFallbackText, asPreview);
 
-        const formattedAmount = currency === TON_CURRENCY_CODE
-          ? formatTonAsText(lang, convertTonFromNanos(amount))
-          : formatStarsAsText(lang, amount);
+        const formattedAmount = price?.currency === TON_CURRENCY_CODE
+          ? formatTonAsText(lang, price.amount)
+          : formatStarsAsText(lang, price?.amount || 0);
 
         if (payerInitiated) {
           return lang('SuggestedPostRefundedByUser', {
@@ -1034,7 +1025,7 @@ const ActionMessageText = ({
 
         const { scheduleDate } = action;
         if (scheduleDate) {
-          const publishDate = formatScheduledDateTime(scheduleDate, lang, oldLang);
+          const publishDate = formatCalendarDate(lang, secondsToDate(scheduleDate), { isShort: true, withTime: true });
           const isPostPublished = scheduleDate <= getServerTime();
 
           return translateWithYou(

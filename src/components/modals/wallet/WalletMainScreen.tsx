@@ -3,7 +3,7 @@ import { memo, useEffect, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiTonAmount, ApiUser, ApiWalletCollectible, ApiWalletSavedWallet, ApiWalletStatus, ApiWalletTransaction,
+  ApiUser, ApiWalletCollectible, ApiWalletSavedWallet, ApiWalletStatus, ApiWalletTransaction,
 } from '../../../api/types';
 
 import { getUserFullName } from '../../../global/helpers';
@@ -52,25 +52,25 @@ type StateProps = {
   canEnableBackup?: boolean;
   hasCloudPassword?: boolean;
   address?: string;
-  ownerName?: string;
-  balance?: ApiTonAmount;
+  currentUser?: ApiUser;
+  balance?: bigint;
   tonUsdRate?: number;
   currency: string;
   currencyRate?: number;
   transactions?: ApiWalletTransaction[];
-  transferMinNanos?: number;
+  transferMinNanos?: bigint;
   collectibles?: ApiWalletCollectible[];
   hasMoreTransactions?: boolean;
   hasMoreCollectibles?: boolean;
   usersById: Record<string, ApiUser>;
   existingWaltBalanceUrl?: string;
   savedWallets?: ApiWalletSavedWallet[];
-  earningsNanos?: number;
+  earningsNanos?: bigint;
 };
 
 const COLLECTIBLES_TAB_INDEX = 1;
 // Nanotons. Above it the screen suggests a cloud password and banners money kept elsewhere.
-const NOTABLE_BALANCE_NANOS = 500000000;
+const NOTABLE_BALANCE_NANOS = 500_000_000n;
 
 const FRAGMENT_GIFTS_URL = 'https://fragment.com/gifts';
 // A percentage in `rootMargin` is relative to the scroll container, so the next page loads one screen early
@@ -78,7 +78,7 @@ const HISTORY_PRELOAD_MARGIN = '100%';
 
 const WalletMainScreen = ({
   activeTab, scrollContainerRef,
-  status, hasStateError, canEnableBackup, hasCloudPassword, address, ownerName, balance, tonUsdRate, currency,
+  status, hasStateError, canEnableBackup, hasCloudPassword, address, currentUser, balance, tonUsdRate, currency,
   currencyRate,
   transactions, transferMinNanos, collectibles, hasMoreTransactions, hasMoreCollectibles, usersById,
   existingWaltBalanceUrl, savedWallets, earningsNanos,
@@ -94,13 +94,13 @@ const WalletMainScreen = ({
   const historyEndRef = useRef<HTMLDivElement>();
 
   const isCollectiblesTab = activeTab === COLLECTIBLES_TAB_INDEX;
-  const shouldProtectAccount = hasCloudPassword === false && (balance?.amount ?? 0) > NOTABLE_BALANCE_NANOS;
+  const shouldProtectAccount = hasCloudPassword === false && (balance ?? 0n) > NOTABLE_BALANCE_NANOS;
   const oldWalletsNanos = useMemo(
-    () => savedWallets?.reduce((sum, wallet) => sum + (wallet.balance ?? 0), 0) ?? 0,
+    () => savedWallets?.reduce((sum, wallet) => sum + (wallet.balance ?? 0n), 0n) ?? 0n,
     [savedWallets],
   );
   const hasOldWalletsFunds = oldWalletsNanos > NOTABLE_BALANCE_NANOS;
-  const hasEarnings = (earningsNanos ?? 0) > NOTABLE_BALANCE_NANOS;
+  const hasEarnings = (earningsNanos ?? 0n) > NOTABLE_BALANCE_NANOS;
   const hasHistory = Boolean(isCollectiblesTab ? collectibles?.length : transactions?.length);
   const hasMoreHistory = isCollectiblesTab ? hasMoreCollectibles : hasMoreTransactions;
 
@@ -224,7 +224,7 @@ const WalletMainScreen = ({
     );
   }
 
-  function formatGramAmount(nanos: number) {
+  function formatGramAmount(nanos: bigint) {
     return formatTonAsIcon(lang, formatTonShortFromNanos(nanos));
   }
 
@@ -270,7 +270,7 @@ const WalletMainScreen = ({
       )}
       <WalletCard
         address={address}
-        ownerName={ownerName}
+        ownerName={getUserFullName(lang, currentUser)}
         balance={balance}
         usdRate={tonUsdRate}
         currency={currency}
@@ -322,7 +322,7 @@ export default memo(withGlobal<OwnProps>(
       canEnableBackup: global.wallet?.state?.canEnableBackup,
       hasCloudPassword: global.settings.byKey.hasPassword,
       address: selectWalletAddress(global),
-      ownerName: currentUser ? getUserFullName(currentUser) : undefined,
+      currentUser,
       balance: global.wallet?.state?.balance,
       tonUsdRate: global.appConfig.tonUsdRate,
       currency: selectWalletCurrency(global),
