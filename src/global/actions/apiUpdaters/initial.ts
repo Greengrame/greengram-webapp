@@ -212,6 +212,11 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
       });
       setGlobal(global);
 
+      // Greengram: the main screen shows while the session is still being
+      // signed in (see App.tsx), and the folder list asked for its folders
+      // on mount, before the key was signed in. Ask again now.
+      getActions().loadChatFolders();
+
       break;
     }
   }
