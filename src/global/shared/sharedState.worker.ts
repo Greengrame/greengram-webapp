@@ -50,7 +50,9 @@ self.onconnect = (e: MessageEvent) => {
       }
       case 'reqGetFullState': {
         const localState = data.localState;
-        if (!state) {
+        // Greengram: a fresh browser's first tab only holds the defaults and never sends its changes,
+        // and the worker outlives a reload, so a saved state wins over them
+        if (!state || (state.isInitial && !localState.isInitial)) {
           // First tab to load, use this state as the source of truth.
           state = localState;
         }

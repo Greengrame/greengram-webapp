@@ -505,7 +505,8 @@ function getString(langKey: LangKey, count: number) {
     ? (langPackStringValue[pluralSuffix] ?? langPackStringValue.other)
     : langPackStringValue;
 
-  return string;
+  // Greengram: "t.me/username" in the texts means this instance
+  return string.includes('t.me/') ? string.replaceAll('t.me/', `${self.location.host}/`) : string;
 }
 
 function processVariable(value: TeactNode | LangFnParametersShape<LangFnOptions>) {

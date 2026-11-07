@@ -131,7 +131,8 @@ const UniqueGiftManageButtons = ({
 
   return (
     <div className={styles.manageButtons}>
-      <Button
+      {/* Greengram: a listed gift stays put until it's taken off sale */}
+      {!giftResalePrice && <Button
         color="transparentBlured"
         iconName="gift-transfer-inline"
         iconAlignment="top"
@@ -145,7 +146,7 @@ const UniqueGiftManageButtons = ({
         <span className={styles.text}>
           {lang('GiftInfoTransfer')}
         </span>
-      </Button>
+      </Button>}
       {(canWear || !canTakeOff) && (
         <Button
           color="transparentBlured"

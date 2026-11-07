@@ -218,7 +218,8 @@ export const processDeepLink = (url: string, linkContext?: LinkContext): boolean
     protocol, searchParams, hostname,
   } = new URL(urlToParse);
 
-  if (protocol !== 'tg:') return false;
+  // Greengram: the bad-parser path above swaps the scheme, so it never was tg: here
+  if (protocol !== 'tg:' && !IS_BAD_URL_PARSER) return false;
 
   const method = hostname as DeepLinkMethod;
   const params = Object.fromEntries(searchParams);

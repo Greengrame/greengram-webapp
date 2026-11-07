@@ -1131,6 +1131,7 @@ export type ApiThemeParameters = {
   subtitle_text_color: string;
   destructive_text_color: string;
   section_separator_color: string;
+  bottom_bar_bg_color: string;
 };
 
 export type ApiBotApp = {

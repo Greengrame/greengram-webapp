@@ -784,6 +784,25 @@ async function loadStickers<T extends GlobalState>(
     return;
   }
 
+  // Greengram: the server answers an unknown name with an empty set, not an error:
+  // the apps retry errors on their built-in names. A link to it shouldn't offer "Add 0 stickers"
+  if ('shortName' in stickerSetInfo && !stickerSet.stickers.length) {
+    Object.values(global.byTabId).forEach(({ id: tabId }) => {
+      if (selectTabState(global, tabId).openedStickerSetShortName === stickerSetInfo.shortName) {
+        global = updateTabState(global, { openedStickerSetShortName: undefined }, tabId);
+      }
+    });
+    setGlobal(global);
+    actions.showNotification({
+      message: {
+        key: 'StickerPackErrorNotFound',
+        options: { withNodes: true, withMarkdown: true, renderTextFilters: ['br', 'links'] },
+      },
+      tabId: getCurrentTabId(),
+    });
+    return;
+  }
+
   const { set, stickers, packs } = stickerSet;
 
   global = updateStickerSet(global, set.id, { ...set, stickers, packs });

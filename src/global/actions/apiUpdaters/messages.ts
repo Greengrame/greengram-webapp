@@ -449,8 +449,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       const chatListType = chat?.folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
+      // Greengram: a gift can be the first message of a chat, with no other
+      // update to bring that chat into the list
+      const isGiftAction = ['starGift', 'giftPremium', 'giftStars', 'giftTon'].includes(newMessage.content.action?.type || '');
       const shouldRestoreChatInList = (
-        !isLocal && !isActionMessage(newMessage) && !chat?.isNotJoined
+        !isLocal && (!isActionMessage(newMessage) || isGiftAction) && !chat?.isNotJoined
         && !selectIsChatListed(global, chatId, chatListType)
       );
       if (shouldRestoreChatInList && chat) {
@@ -967,6 +970,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       global = updateThreadReadState(global, chatId, threadId, readState);
       setGlobal(global);
+
+      // another session read it: the new unread count only comes with the topic
+      if (readState.lastReadInboxMessageId && selectTopic(global, chatId, threadId)) {
+        actions.loadTopicById({ chatId, topicId: Number(threadId) });
+      }
 
       break;
     }

@@ -3,6 +3,7 @@ import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 
 import type { ApiPremiumGiftCodeOption, ApiPremiumSubscriptionOption } from '../../../api/types';
 
+import { STARS_CURRENCY_CODE } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 
@@ -30,6 +31,10 @@ const PremiumSubscriptionOption = ({
   } = option;
   const users = 'users' in option ? option.users : undefined;
   const perMonth = Math.floor(amount / months);
+  // Greengram: plans are priced in Stars, and "XTR" means nothing to a reader
+  const formatPrice = (value: number) => (currency === STARS_CURRENCY_CODE
+    ? `★${value.toLocaleString(lang.code)}`
+    : formatCurrencyAsString(value, currency, lang.code));
   const isUserCountPlural = users ? users > 1 : undefined;
 
   const discount = useMemo(() => {
@@ -74,11 +79,11 @@ const PremiumSubscriptionOption = ({
           {lang('Months', { count: months }, { pluralValue: months })}
         </div>
         <div className={styles.perMonth}>
-          {(isGiveaway || isUserCountPlural) ? `${formatCurrencyAsString(amount, currency, lang.code)} x ${users!}`
-            : lang('PricePerMonth', { amount: formatCurrencyAsString(perMonth, currency, lang.code) })}
+          {(isGiveaway || isUserCountPlural) ? `${formatPrice(amount)} x ${users!}`
+            : lang('PricePerMonth', { amount: formatPrice(perMonth) })}
         </div>
         <div className={styles.amount}>
-          {formatCurrencyAsString(amount, currency, lang.code)}
+          {formatPrice(amount)}
         </div>
       </div>
     </label>

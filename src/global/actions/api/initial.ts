@@ -251,7 +251,11 @@ addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
 
   const targetAccountSlot = getFirstLoggedInAccountSlot() || 1;
   if (targetAccountSlot !== (ACCOUNT_SLOT || 1)) {
-    window.location.replace(getAccountSlotUrl(targetAccountSlot));
+    const url = getAccountSlotUrl(targetAccountSlot);
+    window.location.replace(url);
+    // Greengram: the screens closing after the reset step history back,
+    // which cancels this navigation and leaves the dead slot on screen
+    setTimeout(() => window.location.replace(url), 500);
     return;
   }
 

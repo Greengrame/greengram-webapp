@@ -66,12 +66,13 @@ const EmojiStatusAccessModal = ({
   }, [isOpen, stickerSet, isAccountFrozen]);
 
   const mockPeerWithStatus = useMemo(() => {
-    if (!currentUser || !stickerSet?.stickers) return undefined;
+    // Greengram: the set is empty on an instance with no packs
+    if (!currentUser || !stickerSet?.stickers?.length) return undefined;
     return {
       ...currentUser,
       emojiStatus: {
         type: 'regular',
-        documentId: stickerSet.stickers[currentStatusIndex].id,
+        documentId: stickerSet.stickers[currentStatusIndex % stickerSet.stickers.length].id,
       },
     } satisfies ApiUser;
   }, [currentUser, stickerSet, currentStatusIndex]);

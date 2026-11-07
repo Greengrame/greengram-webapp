@@ -73,7 +73,7 @@ const StickerView = ({
   loopLimit,
   shouldLoop = false,
   shouldPreloadPreview,
-  skipPreview,
+  skipPreview: skipPreviewProp,
   forceAlways,
   forceOnHeavyAnimation,
   observeIntersectionForLoading,
@@ -101,6 +101,8 @@ const StickerView = ({
   const isVideo = sticker.isVideo;
   const isStatic = !isLottie && !isVideo;
   const previewMediaHash = getStickerMediaHash(sticker, 'preview');
+  // Greengram: packs have no thumbs yet, there is nothing to ask for
+  const skipPreview = skipPreviewProp || !sticker.previewPhotoSizes?.length;
 
   const dpr = useDevicePixelRatio();
   const randomIdPrefix = useUniqueId();
@@ -156,7 +158,7 @@ const StickerView = ({
   const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 
   // Preload preview for Message Input and local message
-  useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview);
+  useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview || skipPreview);
 
   const renderId = useMemo(() => ([
     (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix),

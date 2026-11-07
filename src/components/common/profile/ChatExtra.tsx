@@ -30,6 +30,7 @@ import { getIsChatMuted } from '../../../global/helpers/notifications';
 import { getPeerTitle } from '../../../global/helpers/peers';
 import {
   selectBotAppPermissions,
+  selectCanGift,
   selectChat,
   selectChatFullInfo,
   selectCurrentMessageList,
@@ -532,6 +533,11 @@ const ChatExtra = ({
               checked={!isMuted}
               className={styles.switch}
             />
+          </ListItem>
+        )}
+        {userId && !isSelf && selectCanGift(getGlobal(), userId) && (
+          <ListItem icon="gift" iconBg="pink" narrow ripple onClick={() => getActions().openGiftModal({ forUserId: userId })}>
+            <span>{lang('ProfileSendAGift')}</span>
           </ListItem>
         )}
         {businessWorkHours && (

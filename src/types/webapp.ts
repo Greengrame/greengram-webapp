@@ -64,6 +64,11 @@ export type SafeArea = {
 };
 
 interface WebAppInboundEventMap {
+  // Greengram: the wallet asks Web A for a transfer recipient, see WalletRecipientPicker
+  greengram_recipient_picker_probe: null;
+  greengram_recipient_picker_open: {
+    req_id: string;
+  };
   iframe_ready: { reload_supported?: boolean };
   web_app_data_send: { data: string };
   web_app_setup_main_button: WebAppButtonOptions;
@@ -166,6 +171,11 @@ interface WebAppInboundEventMap {
 }
 
 interface WebAppOutboundEventMap {
+  greengram_recipient_picker_available: null;
+  greengram_recipient_picker_closed: {
+    req_id: string;
+    user_id?: string;
+  };
   viewport_changed: {
     height: number;
     width?: number;

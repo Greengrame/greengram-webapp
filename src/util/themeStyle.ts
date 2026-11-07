@@ -19,6 +19,7 @@ export const FALLBACK_THEME_PARAMS: ApiThemeParameters = {
   subtitle_text_color: '#707579',
   destructive_text_color: '#e53935',
   section_separator_color: '#c8c6cc',
+  bottom_bar_bg_color: '#ffffff',
 };
 
 export function extractCurrentThemeParams(): ApiThemeParameters {
@@ -61,6 +62,8 @@ export function extractCurrentThemeParams(): ApiThemeParameters {
     subtitle_text_color: subtitleTextColor,
     destructive_text_color: destructiveTextColor,
     section_separator_color: sectionSeparatorColor,
+    // Greengram: without it the wallet's SDK falls back to its light palette, whatever the theme
+    bottom_bar_bg_color: bgColor,
   };
 }
 

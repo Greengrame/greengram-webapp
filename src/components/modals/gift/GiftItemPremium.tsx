@@ -84,9 +84,9 @@ function GiftItemPremium({
         {lang('PremiumGiftDescription')}
       </div>
       <Button className={styles.buy} color="adaptive" nonInteractive size="tiny" pill fluid>
-        {formatCurrencyAsString(amount, currency)}
+        {optionByStars === option ? formatStarsAsIcon(lang, amount, { asFont: true }) : formatCurrencyAsString(amount, currency)}
       </Button>
-      {optionByStars && (
+      {optionByStars && optionByStars !== option && (
         <div className={styles.starsPriceBlock}>
           {lang('GiftPremiumStarsPrice', {
             stars: (formatStarsAsIcon(lang, optionByStars.amount)),
@@ -102,7 +102,7 @@ function GiftItemPremium({
 
 export default memo(withGlobal<OwnProps>(
   (global, { option }): Complete<StateProps> => {
-    const sticker = selectGiftStickerForDuration(global, option.months);
+    const sticker = selectGiftStickerForDuration(global, option.months * 30);
     const canPlayAnimatedEmojis = selectCanPlayAnimatedEmojis(global);
 
     return {

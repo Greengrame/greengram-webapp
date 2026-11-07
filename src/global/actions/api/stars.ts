@@ -283,6 +283,14 @@ addActionHandler('loadResaleGifts', async (global, actions, payload): Promise<vo
   });
 
   if (!result) {
+    // Greengram: a failed page left isLoading set, the header said "Loading..."
+    // for good and no later filter could load
+    global = getGlobal();
+    tabState = selectTabState(global, tabId);
+    global = updateTabState(global, {
+      resaleGifts: { ...tabState.resaleGifts, isLoading: false },
+    }, tabId);
+    setGlobal(global);
     return;
   };
 

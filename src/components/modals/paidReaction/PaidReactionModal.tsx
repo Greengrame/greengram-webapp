@@ -39,6 +39,8 @@ import Modal from '../../ui/Modal';
 import Separator from '../../ui/Separator';
 import BalanceBlock from '../stars/BalanceBlock';
 import StarSlider from './StarSlider';
+import ConfirmDialog from '../../ui/ConfirmDialog';
+import InputText from '../../ui/InputText';
 
 import styles from './PaidReactionModal.module.scss';
 
@@ -92,6 +94,10 @@ const PaidReactionModal = ({
   const [isTouched, markTouched, unmarkTouched] = useFlag();
   const [shouldSendAsAnonymous, setShouldSendAsAnonymous] = useState(true);
   const [sendAsPeerId, setSendAsPeerId] = useState(currentUserId);
+  // Greengram: any amount, not only what the slider lands on
+  const [sliderDefault, setSliderDefault] = useState(DEFAULT_STARS_AMOUNT);
+  const [isCustomAmountOpen, openCustomAmount, closeCustomAmount] = useFlag();
+  const [customAmount, setCustomAmount] = useState('');
 
   const chatId = chat?.id;
 
@@ -107,6 +113,22 @@ const PaidReactionModal = ({
   const handleAmountChange = useLastCallback((value: number) => {
     setStarsAmount(value);
     markTouched();
+  });
+
+  const handleCustomAmountChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    if (Number(value) > maxAmount) return;
+    setCustomAmount(value);
+  });
+
+  const handleCustomAmountSubmit = useLastCallback(() => {
+    const value = Number(customAmount);
+    if (!value) return;
+    setStarsAmount(value);
+    setSliderDefault(value);
+    markTouched();
+    setCustomAmount('');
+    closeCustomAmount();
   });
 
   useEffect(() => {
@@ -286,7 +308,9 @@ const PaidReactionModal = ({
     return result.slice(0, MAX_TOP_REACTORS);
   }, [isTouched, message?.reactions?.topReactors, starsAmount, sendAsPeerId, shouldSendAsAnonymous]);
 
-  const chatTitle = chat && getPeerTitle(lang, chat);
+  // Greengram: the Stars go to whoever wrote the message, not the chat
+  const authorPeer = message?.senderId ? selectPeer(getGlobal(), message.senderId) : undefined;
+  const chatTitle = (authorPeer || chat) && getPeerTitle(lang, (authorPeer || chat)!);
 
   return (
     <Modal
@@ -306,9 +330,11 @@ const PaidReactionModal = ({
 
       <StarSlider
         className={styles.slider}
-        defaultValue={DEFAULT_STARS_AMOUNT}
+        defaultValue={sliderDefault}
         maxValue={maxAmount}
         onChange={handleAmountChange}
+        onCustomValueClick={openCustomAmount}
+        shouldAllowCustomValue
       />
       <h3 className={styles.title}>{lang('StarsReactionTitle')}</h3>
       <div className={styles.description}>
@@ -364,6 +390,25 @@ const PaidReactionModal = ({
           withNodes: true,
         })}
       </p>
+      <ConfirmDialog
+        isOpen={isCustomAmountOpen}
+        title="Custom amount"
+        confirmLabel="Set"
+        isConfirmDisabled={!Number(customAmount)}
+        confirmHandler={handleCustomAmountSubmit}
+        onClose={closeCustomAmount}
+      >
+        <div className={styles.customAmountInput}>
+          <Icon name="star" className={styles.customAmountIcon} />
+          <InputText
+            value={customAmount}
+            onChange={handleCustomAmountChange}
+            placeholder={`1 - ${maxAmount}`}
+            inputMode="numeric"
+            teactExperimentControlled
+          />
+        </div>
+      </ConfirmDialog>
     </Modal>
   );
 };

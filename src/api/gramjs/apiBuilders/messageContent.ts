@@ -548,7 +548,7 @@ function buildGiveawayResultsFromMedia(media: GramJs.TypeMessageMedia): ApiGivea
 function buildGiveawayResults(media: GramJs.MessageMediaGiveawayResults): ApiGiveawayResults | undefined {
   const {
     months, untilDate, onlyNewSubscribers, launchMsgId, unclaimedCount, winners, winnersCount,
-    additionalPeersCount, prizeDescription, refunded, channelId,
+    additionalPeersCount, prizeDescription, refunded, channelId, stars,
   } = media;
 
   const winnerIds = winners.map((winner) => buildApiPeerId(winner, 'user'));
@@ -556,6 +556,8 @@ function buildGiveawayResults(media: GramJs.MessageMediaGiveawayResults): ApiGiv
   return {
     mediaType: 'giveawayResults',
     months,
+    // Greengram: upstream drops it, and a Stars giveaway's info sheet then reads as Premium
+    stars: toJSNumber(stars),
     untilDate,
     isOnlyForNewSubscribers: onlyNewSubscribers,
     launchMessageId: launchMsgId,

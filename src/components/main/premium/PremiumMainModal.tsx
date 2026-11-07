@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from '@teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
   ApiPremiumPromo,
@@ -12,7 +12,7 @@ import type {
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
-import { PREMIUM_FEATURE_SECTIONS, TME_LINK_PREFIX } from '../../../config';
+import { PREMIUM_FEATURE_SECTIONS, STARS_CURRENCY_CODE, TME_LINK_PREFIX } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';
 import {
   selectCustomEmoji,
@@ -183,6 +183,17 @@ const PremiumMainModal = ({
   const handleClickWithStartParam = useLastCallback((startParam?: string) => {
     const dialog = dialogRef.current;
     if (!dialog) return;
+
+    // Greengram: plans are priced in Stars and paid here, there's no bot to go to
+    const { currentUserId } = getGlobal();
+    if (selectedSubscriptionOption?.currency === STARS_CURRENCY_CODE && currentUserId) {
+      openInvoice({
+        type: 'premiumGiftStars',
+        userId: currentUserId,
+        months: selectedSubscriptionOption.months,
+      });
+      return;
+    }
 
     if (premiumSlug) {
       openInvoice({
@@ -498,6 +509,7 @@ const PremiumMainModal = ({
             isPremium={isPremium}
             limits={limits}
             premiumPromoOrder={premiumPromoOrder}
+            featureIcons={PREMIUM_FEATURE_COLOR_ICONS}
             subscriptionOption={selectedSubscriptionOption}
           />
         )}

@@ -6,6 +6,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { isSameReaction } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import renderText from '../helpers/renderText';
 
 import useThumbnail from '../../../hooks/media/useThumbnail';
 import useMedia from '../../../hooks/useMedia';
@@ -40,7 +41,10 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
   ), [availableReactions, reaction]);
   const staticIcon = availableReaction?.staticIcon;
   const staticIconId = staticIcon?.id;
-  const mediaHash = staticIconId ? `document${staticIconId}` : undefined;
+  // Greengram: without Telegram's reaction artwork the static icon is an animated
+  // sticker, which an <img> can't draw, so show the emoji itself
+  const isStaticIconDrawable = staticIcon?.mimeType !== 'application/x-tgsticker';
+  const mediaHash = staticIconId && isStaticIconDrawable ? `document${staticIconId}` : undefined;
   const cacheBuster = availableReaction?.isLocalCache ? 0 : 1;
   const mediaData = useMedia(mediaHash, false, undefined, undefined, cacheBuster);
   const thumbDataUri = useThumbnail(staticIcon?.thumbnail);
@@ -69,6 +73,17 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
   if (shouldReplaceWithHeartIcon) {
     return (
       <Icon name="heart" className="ReactionStaticEmoji" style={`font-size: ${size}px; width: ${size}px`} />
+    );
+  }
+
+  if (!isStaticIconDrawable && reaction.type === 'emoji') {
+    return (
+      <div
+        className={buildClassName('ReactionStaticEmoji', className)}
+        style={size ? `width: ${size}px; height: ${size}px; font-size: ${size * 0.85}px; line-height: ${size}px` : undefined}
+      >
+        {renderText(reaction.emoticon, ['emoji'])}
+      </div>
     );
   }
 

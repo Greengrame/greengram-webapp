@@ -396,7 +396,7 @@ export function getPeerColorCount(peer: ApiPeer) {
   if (key === undefined) return 1;
 
   const global = getGlobal();
-  return global.peerColors?.general[key].colors?.length || 1;
+  return global.peerColors?.general[key]?.colors?.length || 1;
 }
 
 export function getPeerColorCollectibleColorCount(color: ApiPeerColorCollectible): number {

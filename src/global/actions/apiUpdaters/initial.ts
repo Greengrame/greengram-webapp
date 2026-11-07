@@ -132,6 +132,19 @@ function onUpdateApiReady<T extends GlobalState>(global: T) {
   void retryLocalization(selectSharedSettings(global).language);
 }
 
+// Greengram: sign-in lives on the instance's /login page. The worker only
+// asks for a phone number when the browser has no session; send people
+// there, at most once a minute so a broken session can't loop.
+function openGreengramLogin() {
+  const KEY = 'greengram-login-redirect';
+  const last = Number(sessionStorage.getItem(KEY)) || 0;
+  // #login is Add Account asking for it; /login never comes back with it
+  if (Date.now() - last < 60000 && window.location.hash !== '#login') return;
+  sessionStorage.setItem(KEY, String(Date.now()));
+  const slot = new URLSearchParams(window.location.search).get('account');
+  window.location.replace(`/login?next=chat${slot ? `&account=${encodeURIComponent(slot)}` : ''}`);
+}
+
 function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationState) {
   const wasAuthReady = global.auth.state === 'authorizationStateReady';
   const authState = update.authorizationState;
@@ -144,6 +157,10 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
   global = getGlobal();
 
   switch (authState) {
+    case 'authorizationStateWaitPhoneNumber':
+    case 'authorizationStateWaitQrCode':
+      openGreengramLogin();
+      break;
     case 'authorizationStateLoggingOut':
       void forceWebsync(false);
 
@@ -179,6 +196,7 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
       setGlobal(global);
       break;
     case 'authorizationStateReady': {
+      sessionStorage.removeItem('greengram-login-redirect');
       if (wasAuthReady) {
         break;
       }
@@ -194,6 +212,19 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
         }, tabId);
       });
       setGlobal(global);
+
+      // Greengram: the main screen shows while the session is still being
+      // signed in (see App.tsx), and the folder list asked for its folders
+      // on mount, before the key was signed in. Ask again now.
+      getActions().loadChatFolders();
+      // Greengram: the main screen shows before sign-in ends (see App.tsx). A
+      // search typed by then was refused, and nothing asks again until it changes.
+      Object.values(global.byTabId).forEach(({ id: tabId }) => {
+        const { query, chatId } = selectTabState(global, tabId).globalSearch;
+        if (!query || chatId) return;
+        getActions().setGlobalSearchQuery({ query, tabId });
+        getActions().searchMessagesGlobal({ type: 'text', shouldResetResultsByType: true, tabId });
+      });
 
       break;
     }
@@ -319,4 +350,6 @@ function onUpdateCurrentUser<T extends GlobalState>(global: T, update: ApiUpdate
 
   updateSessionUserId(currentUser.id);
   finishWebLogin(currentUser.id);
+  // Greengram: a new account has no Saved Messages dialog yet, and forwarding there needs the chat
+  getActions().fetchChat({ chatId: currentUser.id });
 }

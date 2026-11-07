@@ -204,7 +204,7 @@ type OAuthLinkBuilderParams = Omit<BuilderParams<OAuthLink>, 'url'> & {
   url: string;
 };
 
-const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
+const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog', self.location.hostname]);
 const MAX_BOT_START_PARAMETER_LENGTH = 64;
 // Up to nine decimals: a finer amount would round into one the link does not name
 const RE_GRAMS_AMOUNT = /^\d+(\.\d{1,9})?$/;
@@ -213,6 +213,25 @@ export const RE_TON_TRANSFER_LINK = /^ton:\/\/transfer(?:[/?#]|$)/i;
 // A `tc:` link is only followed as a platform deep link, never from message content
 export function isDeepLink(link: string): boolean {
   return Boolean(link.match(RE_TME_LINK) || link.match(RE_TG_LINK) || link.match(RE_TON_TRANSFER_LINK));
+}
+
+// Greengram: this instance's own /addemoji/name, /addstickers/name, /u/name and
+// /+invite stand in for t.me's. Same paths the server redirects on a fresh load.
+export function instanceLinkToDeepLink(link: string): string | undefined {
+  let url: URL;
+  try {
+    url = new URL(link);
+  } catch (err) {
+    return undefined;
+  }
+  if (url.host !== window.location.host) return undefined;
+  const pack = url.pathname.match(/^\/(addemoji|addstickers)\/([A-Za-z0-9_]+)\/?$/);
+  if (pack) return `tg://${pack[1]}?set=${pack[2]}`;
+  const user = url.pathname.match(/^\/u\/([A-Za-z0-9_]+)\/?$/);
+  if (user) return `tg://resolve?domain=${user[1]}`;
+  const invite = url.pathname.match(/^\/\+([A-Za-z0-9_-]+)\/?$/);
+  if (invite) return `tg://join?invite=${invite[1]}`;
+  return undefined;
 }
 
 export function tryParseDeepLink(link: string): DeepLink | undefined {
@@ -367,6 +386,8 @@ function parseHttpLink(url: URL) {
   }
   const queryParams = getQueryParams(url);
   const pathParams = getPathParams(url);
+  // Greengram: help.getConfig and older messages link people as /u/name
+  if (url.hostname === self.location.hostname && pathParams[0] === 'u') pathParams.shift();
 
   const deepLinkType = getHttpDeepLinkType(queryParams, pathParams);
   switch (deepLinkType) {

@@ -9,7 +9,7 @@ import type { AnimationLevel, ThreadId } from '../../../types';
 
 import { PEER_PICKER_ITEM_HEIGHT_PX } from '../../../config';
 import {
-  getCanPostInChat, getGroupStatus, getOrderedTopics, getUserStatus, isUserOnline,
+  getCanPostInChat, getGroupStatus, getMainUsername, getOrderedTopics, getUserStatus, isUserOnline,
 } from '../../../global/helpers';
 import { isApiPeerChat } from '../../../global/helpers/peers';
 import {
@@ -68,6 +68,9 @@ export type OwnProps = {
   footer?: TeactNode;
   viewportFooter?: TeactNode;
   selectedIds?: ChatSelectionKey[];
+  // Greengram: strangers from a server search can share a name, the username is what tells them apart
+  usernameSubtitleIds?: string[];
+  noResultsText?: string;
   loadMore?: NoneToVoidFunction;
   onSearchChange: (search: string) => void;
   onSelectChatOrUser: (chatOrUserId: string, threadId?: ThreadId) => void;
@@ -110,6 +113,8 @@ const ChatOrUserPicker = ({
   viewportFooter,
   listActiveKey,
   selectedIds,
+  usernameSubtitleIds,
+  noResultsText,
   animationLevel,
   shouldSkipHistoryAnimations,
   loadMore,
@@ -266,6 +271,9 @@ const ChatOrUserPicker = ({
         return [getGroupStatus(lang, peer)];
       }
 
+      const username = usernameSubtitleIds?.includes(peer.id) && getMainUsername(peer);
+      if (username) return [`@${username}`];
+
       const userStatus = selectUserStatus(global, peer.id);
       return [
         getUserStatus(lang, peer, userStatus),
@@ -319,7 +327,7 @@ const ChatOrUserPicker = ({
         onClick={() => handleClick(id)}
       />
     );
-  }, [currentUserId, lang, viewportOffset, selectedIds]);
+  }, [currentUserId, lang, viewportOffset, selectedIds, usernameSubtitleIds]);
 
   function renderTopicList() {
     return (
@@ -432,6 +440,7 @@ const ChatOrUserPicker = ({
             viewportIds={viewportIds}
             maxHeight={chatOrUserIds.length * PEER_PICKER_ITEM_HEIGHT_PX}
             viewportFooter={viewportFooter}
+            noResultsText={noResultsText}
             onLoadMore={getMore}
             onSelect={handleChatSelect}
             renderItem={renderChatItem}
@@ -478,6 +487,7 @@ type ChatListContentProps = {
   viewportIds?: string[];
   maxHeight: number;
   viewportFooter?: TeactNode;
+  noResultsText?: string;
   onLoadMore: InfiniteScrollProps['onLoadMore'];
   onSelect: (index: number) => void;
   renderItem: (id: string, index: number) => TeactNode;
@@ -489,6 +499,7 @@ function ChatListContent({
   viewportIds,
   maxHeight,
   viewportFooter,
+  noResultsText,
   onLoadMore,
   onSelect,
   onKeyDownHandlerUpdate,
@@ -522,7 +533,7 @@ function ChatListContent({
           )}
         </InfiniteScroll>
       ) : viewportIds && !viewportIds.length ? (
-        <p className="no-results">{lang('NothingFound')}</p>
+        <p className="no-results">{noResultsText || lang('NothingFound')}</p>
       ) : (
         <Loading />
       )}

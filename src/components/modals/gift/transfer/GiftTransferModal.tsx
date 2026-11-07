@@ -32,6 +32,8 @@ type StateProps = {
 
 type Categories = 'withdraw';
 
+const IS_BLOCKCHAIN_TRANSFER_AVAILABLE = false;
+
 const GiftTransferModal = ({
   modal, contactIds, currentUserId,
 }: OwnProps & StateProps) => {
@@ -64,7 +66,8 @@ const GiftTransferModal = ({
   const relevantFoundIds = currentResultsQuery === searchQuery ? foundIds : undefined;
 
   const categories = useMemo(() => {
-    if (searchQuery) return MEMO_EMPTY_ARRAY;
+    // Greengram: nothing goes on a blockchain, so no "Send via Blockchain"
+    if (searchQuery || !IS_BLOCKCHAIN_TRANSFER_AVAILABLE) return MEMO_EMPTY_ARRAY;
 
     return [{
       type: 'withdraw',

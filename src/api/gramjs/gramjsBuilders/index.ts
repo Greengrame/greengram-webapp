@@ -1126,6 +1126,11 @@ export function buildInputPrivacyRules(
         privacyRules.push(new GramJs.InputPrivacyValueAllowContacts());
         break;
 
+      // Greengram: story settings offer it, upstream only reads it back
+      case 'closeFriends':
+        privacyRules.push(new GramJs.InputPrivacyValueAllowCloseFriends());
+        break;
+
       case 'nonContacts':
         privacyRules.push(new GramJs.InputPrivacyValueDisallowContacts());
         break;

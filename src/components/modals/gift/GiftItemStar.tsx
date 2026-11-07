@@ -139,7 +139,8 @@ function GiftItemStar({
         <GiftRibbon
           color={[giftAttrs.backdrop.centerColor, giftAttrs.backdrop.edgeColor]}
           text={
-            lang('GiftSavedNumber', { number: giftNumber })
+            // Greengram: the instance's offers get their number when bought
+            giftNumber ? lang('GiftSavedNumber', { number: giftNumber }) : lang('New')
           }
         />
       );

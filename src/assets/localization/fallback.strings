@@ -712,7 +712,7 @@
 "ForwardForStars" = "Forward for {price}";
 "MediaZoomOut" = "Zoom Out";
 "MediaZoomIn" = "Zoom In";
-"PeerInfoReportProfileVideo" = "Report Profile Photo";
+"PeerInfoReportProfileVideo" = "Report Profile Video";
 "PeerInfoReportProfilePhoto" = "Report Profile Photo";
 "MediaviewProfilePhoto" = "Profile Photo";
 "AccActionPlay" = "Play";
@@ -4511,3 +4511,9 @@
 "SettingsKeywordsLastSeen" = "online, last seen, status";
 "SettingsKeywordsLogOut" = "log out, sign out, exit";
 "SettingsSearchEmpty" = "Start typing to find a setting";
+"ActionWalletTransferText" = "{from} sent you {amount}";
+"ActionWalletTransferTextYou" = "You sent {amount}";
+"ActionWalletTransferDescription" = "Sent with Wallet. Tap to open it.";
+"WalletRecipientEmpty" = "Type a username to find someone";
+"WalletRecipientNotFound" = "Nobody found. Only people can receive transfers";
+"GiftInfoIssuedUnlimited" = "{issued} issued";

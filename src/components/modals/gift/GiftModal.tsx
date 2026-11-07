@@ -47,6 +47,8 @@ import StarGiftCategoryList from './StarGiftCategoryList';
 
 import styles from './GiftModal.module.scss';
 
+const SHOW_STARS_ONLY_TOGGLE = false;
+
 export type OwnProps = {
   modal: TabState['giftModal'];
 };
@@ -148,8 +150,11 @@ const GiftModal = ({
   const lang = useLang();
   const allGifts = renderingModal?.gifts;
   const filteredGifts = useMemo(() => {
-    return allGifts?.sort((prevGift, gift) => prevGift.months - gift.months)
-      .filter((gift) => gift.users === 1 && gift.currency !== STARS_CURRENCY_CODE);
+    const options = allGifts?.sort((prevGift, gift) => prevGift.months - gift.months)
+      .filter((gift) => gift.users === 1);
+    const paid = options?.filter((gift) => gift.currency !== STARS_CURRENCY_CODE);
+    // Greengram: plans are priced in Stars only
+    return paid?.length ? paid : options;
   }, [allGifts]);
 
   const giftsByStars = useMemo(() => {
@@ -171,7 +176,8 @@ const GiftModal = ({
   }, [allGifts, filteredGifts]);
 
   const baseGift = useMemo(() => {
-    return filteredGifts?.reduce((prev, gift) => (prev.amount < gift.amount ? prev : gift));
+    if (!filteredGifts?.length) return undefined;
+    return filteredGifts.reduce((prev, gift) => (prev.amount < gift.amount ? prev : gift));
   }, [filteredGifts]);
 
   const {
@@ -631,7 +637,8 @@ const GiftModal = ({
           />
         )}
       </Transition>
-      {isResaleScreen && (
+      {/* Greengram: every listing is in Stars, the toggle would do nothing */}
+      {isResaleScreen && SHOW_STARS_ONLY_TOGGLE && (
         <Checkbox
           className={buildClassName(
             styles.starsOnlyToggle,

@@ -100,6 +100,25 @@
 .boostSection {
   display: flex;
   flex-direction: column-reverse;
+
+  // Greengram: Transition measures a tab the first time it shows while it is still
+  // absolute at 100% height, so it pins itself to the old tab's height (0 when that
+  // tab was empty) and the list draws over the sections below. Once the slide is
+  // done, let it take its content's height.
+  > :global(.Transition:not([class*='Transition-slide'])) {
+    flex-basis: auto !important;
+    height: auto !important;
+  }
+
+  > :global(.Transition) {
+    overflow: hidden;
+  }
+
+  // The tabs stick to the top while the list scrolls under them; avatars and badges
+  // in the rows sit at z-index 1-2 and would draw over them
+  > :global(.SquareTabList) {
+    z-index: 3;
+  }
 }
 
 .primaryLink {

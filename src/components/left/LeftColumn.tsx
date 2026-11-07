@@ -9,7 +9,7 @@ import type { GlobalState } from '../../global/types';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';
 import {
-  type AnimationLevel, LeftColumnContent, type SettingsHighlight, SettingsScreens,
+  type AnimationLevel, GlobalSearchContent, LeftColumnContent, type SettingsHighlight, SettingsScreens,
 } from '../../types';
 
 import {
@@ -112,6 +112,7 @@ function LeftColumn({
 }: OwnProps & StateProps) {
   const {
     setGlobalSearchQuery,
+    setGlobalSearchContent,
     setGlobalSearchClosing,
     setGlobalSearchChatId,
     resetChatCreation,
@@ -172,6 +173,9 @@ function LeftColumn({
       resetChatCreation();
       setTimeout(() => {
         setGlobalSearchQuery({ query: '' });
+        // Greengram: a Media or Apps tab left from the last search would
+        // answer the next one with "No Results"
+        setGlobalSearchContent({ content: GlobalSearchContent.ChatList });
         setGlobalSearchDate({ date: undefined });
         setGlobalSearchChatId({ id: undefined });
         setGlobalSearchClosing({ isClosing: false });

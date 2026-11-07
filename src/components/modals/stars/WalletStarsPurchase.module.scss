@@ -1,0 +1,28 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-self: stretch;
+
+  margin-top: 1rem;
+  margin-inline: 0.5rem;
+
+  text-align: start;
+}
+
+.hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.result {
+  margin: 0 0 0.5rem;
+  text-align: center;
+}
+
+.error {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-error);
+}

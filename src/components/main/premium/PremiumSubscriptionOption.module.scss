@@ -145,3 +145,16 @@
   font-size: 0.8125rem;
   font-weight: var(--font-weight-medium);
 }
+
+// Greengram: the rows take a pointer, so they should answer to it
+.wrapper,
+.giveawayWrapper {
+  transition: background-color 0.15s ease-out;
+}
+
+@media (hover: hover) {
+  .wrapper:hover,
+  .giveawayWrapper:hover {
+    background-color: var(--color-interactive-element-hover);
+  }
+}

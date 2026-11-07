@@ -13,6 +13,7 @@ import { getPeerTitle } from '../../../../global/helpers/peers';
 import {
   selectUser,
 } from '../../../../global/selectors';
+import { STARS_CURRENCY_CODE } from '../../../../config';
 import buildClassName from '../../../../util/buildClassName';
 import { formatCurrencyAsString } from '../../../../util/formatCurrency';
 import renderText from '../../../common/helpers/renderText';
@@ -23,6 +24,8 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 
 import Avatar from '../../../common/Avatar';
 import SafeLink from '../../../common/SafeLink';
+import Button from '../../../ui/Button';
+import InputText from '../../../ui/InputText';
 import Modal from '../../../ui/Modal';
 import StarTopupOptionList from '../StarTopupOptionList';
 
@@ -58,6 +61,7 @@ const StarsGiftModal = ({
 
   const [selectedOption, setSelectedOption] = useState<ApiStarTopupOption | undefined>();
   const [isHeaderHidden, setIsHeaderHidden] = useState(true);
+  const [customAmount, setCustomAmount] = useState('');
 
   useEffect(() => {
     if (!isOpen) {
@@ -118,6 +122,26 @@ const StarsGiftModal = ({
 
   const handleClose = useLastCallback(() => {
     closeStarsGiftModal();
+  });
+
+  // Greengram: any amount, not only the tiers; the server checks the limit and the balance
+  const customStars = Number(customAmount);
+  const isCustomValid = Number.isInteger(customStars) && customStars > 0;
+
+  const handleCustomChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomAmount(e.target.value.replace(/\D/g, '').slice(0, 9));
+  });
+
+  const handleCustomSend = useLastCallback(() => {
+    if (!user || !isCustomValid) return;
+
+    openInvoice({
+      type: 'starsgift',
+      userId: user.id,
+      stars: customStars,
+      currency: STARS_CURRENCY_CODE,
+      amount: customStars,
+    });
   });
 
   function renderGiftTitle() {
@@ -190,6 +214,20 @@ const StarsGiftModal = ({
             options={renderingModal?.starsGiftOptions}
             onClick={handleClick}
           />
+          {user && (
+            <div className={styles.customAmount}>
+              <InputText
+                label="Custom amount"
+                inputMode="numeric"
+                value={customAmount}
+                onChange={handleCustomChange}
+                teactExperimentControlled
+              />
+              <Button fluid disabled={!isCustomValid} onClick={handleCustomSend}>
+                {isCustomValid ? `Send \u2605${customStars.toLocaleString(lang.code)}` : 'Enter an amount'}
+              </Button>
+            </div>
+          )}
           <div className={styles.secondaryInfo}>
             {bottomText}
           </div>

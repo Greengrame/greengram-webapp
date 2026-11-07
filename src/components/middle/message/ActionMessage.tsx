@@ -184,6 +184,7 @@ const ActionMessage = ({
     declineStarGiftOffer,
     showNotification,
     toggleNoForwards,
+    openChatByUsername,
   } = getActions();
 
   const ref = useRef<HTMLDivElement>();
@@ -428,7 +429,12 @@ const ActionMessage = ({
         break;
       }
 
-      case 'giftTon':
+      case 'giftTon': {
+        // Greengram: a wallet transfer, its details are in the wallet
+        openChatByUsername({ username: 'wallet', shouldStartMainApp: true });
+        break;
+      }
+
       case 'giftStars': {
         openStarsTransactionFromGift({
           chatId: message.chatId,

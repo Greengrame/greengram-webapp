@@ -82,6 +82,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateConfig':
       actions.loadConfig();
+      // Greengram: a freeze or unfreeze has to show now, not at the next refetch
+      actions.loadAppConfig();
       break;
 
     case 'updateAiComposeTones':

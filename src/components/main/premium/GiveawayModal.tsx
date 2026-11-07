@@ -141,7 +141,8 @@ const GiveawayModal = ({
     },
   }];
 
-  if (isStarsGiftEnabled) {
+  // Greengram: an empty list means no Stars prizes on this server
+  if (isStarsGiftEnabled && starsGiftOptions?.length) {
     TYPE_OPTIONS.push({
       name: 'TelegramStars',
       text: 'BoostingWinnersRandomly',
@@ -217,7 +218,7 @@ const GiveawayModal = ({
   }, [dataStarsPrepaidGiveaway, starsGiftOptions, isStarsPrepaidGiveaway]);
 
   const filteredGifts = useMemo(() => {
-    return gifts?.filter((gift) => gift.users === selectedUserCount && gift.currency !== STARS_CURRENCY_CODE);
+    return gifts?.filter((gift) => gift.users === selectedUserCount);
   }, [gifts, selectedUserCount]);
 
   const fullMonthlyAmount = useMemo(() => {
@@ -229,7 +230,7 @@ const GiveawayModal = ({
   }, [filteredGifts]);
 
   const userCountOptions = useMemo(() => {
-    return unique((gifts?.filter((gift) => gift.currency !== STARS_CURRENCY_CODE)
+    return unique((gifts
       ?.map((winner) => winner.users) || [])).sort((a, b) => a - b);
   }, [gifts]);
 

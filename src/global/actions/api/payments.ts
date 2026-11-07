@@ -47,6 +47,7 @@ import {
   selectPaymentCredentialsData,
   selectPaymentInputInvoice,
   selectPaymentRequestId,
+  selectPeer,
   selectProviderPublicToken,
   selectProviderPublishableKey,
   selectStarsPayment,
@@ -169,7 +170,9 @@ addActionHandler('sendStarGift', (global, actions, payload): ActionReturnType =>
     shouldUpgrade: shouldUpgrade || undefined,
   };
 
-  payInputStarInvoice(global, inputInvoice, buildStarsAmount(gift.stars), tabId);
+  // Greengram: the form prices the upgrade too, so expect it or it reads as a price change
+  const price = gift.stars + (shouldUpgrade && gift.upgradeStars ? gift.upgradeStars : 0);
+  payInputStarInvoice(global, inputInvoice, buildStarsAmount(price), tabId);
 });
 
 addActionHandler('buyStarGift', (global, actions, payload): ActionReturnType => {
@@ -381,6 +384,10 @@ addActionHandler('sendStarPaymentForm', async (global, actions, payload): Promis
     tabId,
   });
   actions.loadStarStatus();
+  // Greengram: the catalog is only loaded at startup, so a limited gift would still show the count before this buy
+  if (inputInvoice.type === 'stargift') {
+    actions.loadStarGifts();
+  }
 });
 
 async function sendStripeCredentials<T extends GlobalState>(
@@ -1126,7 +1133,8 @@ addActionHandler('transferGift', (global, actions, payload): ActionReturnType =>
     gift, recipientId, transferStars, tabId = getCurrentTabId(),
   } = payload;
 
-  const peer = selectChat(global, recipientId);
+  // Greengram: someone found by search has a user but no chat yet
+  const peer = selectPeer(global, recipientId);
 
   const requestSavedGift = getRequestInputSavedStarGift(global, gift);
   if (!peer || !requestSavedGift) {

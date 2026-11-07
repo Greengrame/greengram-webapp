@@ -16,6 +16,7 @@ import {
 } from '../../../../global/selectors';
 import { formatCountdownDays } from '../../../../util/dates/duration';
 import { formatTonAsIcon } from '../../../../util/localization/format';
+import { formatWalletTransferAmount } from '../../../../util/walletTransfer';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import { type ObserveFn } from '../../../../hooks/useIntersectionObserver';
@@ -54,11 +55,9 @@ const GiftAction = ({
 
   const renderTonTitle = () => {
     const { cryptoAmount, cryptoCurrency } = action;
-    const price = cryptoAmount && cryptoCurrency === TON_CURRENCY_CODE
+    return cryptoCurrency === TON_CURRENCY_CODE && cryptoAmount
       ? formatTonAsIcon(lang, cryptoAmount, { isMono: true })
-      : undefined;
-
-    return price;
+      : formatWalletTransferAmount(lang, cryptoAmount, cryptoCurrency);
   };
 
   return (
@@ -90,7 +89,7 @@ const GiftAction = ({
         <div>
           {message && renderTextWithEntities(message)}
           {!message
-            && (lang(action.type === 'giftTon' ? 'DescriptionAboutGram'
+            && (lang(action.type === 'giftTon' ? 'ActionWalletTransferDescription'
               : action.type === 'giftPremium'
                 ? 'ActionGiftPremiumText' : 'ActionGiftStarsText'))}
         </div>

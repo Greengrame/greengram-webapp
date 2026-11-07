@@ -80,7 +80,9 @@ function GiftComposer({
   const [giftMessage, setGiftMessage] = useState<string>('');
   const [shouldHideName, setShouldHideName] = useState<boolean>(false);
   const [shouldPayForUpgrade, setShouldPayForUpgrade] = useState<boolean>(false);
-  const [shouldPayByStars, setShouldPayByStars] = useState<boolean>(false);
+  // Greengram: a plan priced in Stars has no other way to be paid
+  const isStarsOnly = giftByStars === gift;
+  const [shouldPayByStars, setShouldPayByStars] = useState<boolean>(isStarsOnly);
 
   useEffect(() => {
     if (shouldDisallowLimitedStarGifts) {
@@ -235,7 +237,8 @@ function GiftComposer({
     }
   });
 
-  const canUseStarsPayment = hasPremiumByStars && starBalance && (starBalance.amount > giftByStars.amount);
+  const canUseStarsPayment = !isStarsOnly && hasPremiumByStars && starBalance
+    && (starBalance.amount > giftByStars.amount);
   function renderOptionsSection() {
     const symbolsLeft = captionLimit ? captionLimit - giftMessage.length : undefined;
 

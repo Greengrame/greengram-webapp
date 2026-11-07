@@ -37,6 +37,7 @@ import { formatCalendarDate, formatDateTime, secondsToDate } from '../../../util
 import {
   formatCurrencyAmountAsText, formatStarsAsText, formatTonAsIcon, formatTonAsText,
 } from '../../../util/localization/format';
+import { formatWalletTransferAmount } from '../../../util/walletTransfer';
 import { conjuctionWithNodes } from '../../../util/localization/utils';
 import { getServerTime } from '../../../util/serverTime';
 import renderText from '../../common/helpers/renderText';
@@ -518,15 +519,24 @@ const ActionMessageText = ({
         return translateWithYou(lang, 'ActionGramTransferText', isOutgoing, { from, amount, worth });
       }
 
-      case 'giftStars':
-      case 'giftPremium':
       case 'giftTon': {
+        // Greengram: this is a wallet transfer between two people, any coin
+        const { cryptoAmount, cryptoCurrency } = action;
+        const sent = formatWalletTransferAmount(lang, cryptoAmount, cryptoCurrency);
+
+        return translateWithYou(
+          lang, 'ActionWalletTransferText', isOutgoing, { from: senderLink, amount: renderStrong(sent) },
+        );
+      }
+
+      case 'giftStars':
+      case 'giftPremium': {
         const {
-          amount, currency, cryptoAmount, cryptoCurrency, type,
+          amount, currency, cryptoAmount, cryptoCurrency,
         } = action;
 
         const price = formatCurrency(lang, amount, currency, { asFontIcon: true });
-        const cryptoPrice = cryptoAmount && cryptoCurrency === TON_CURRENCY_CODE && type !== 'giftTon'
+        const cryptoPrice = cryptoAmount && cryptoCurrency === TON_CURRENCY_CODE
           ? formatTonAsIcon(lang, cryptoAmount) : undefined;
 
         const cost = cryptoPrice ? lang('ActionGiftCostCrypto', { price, cryptoPrice }, { withNodes: true }) : price;
@@ -746,7 +756,8 @@ const ActionMessageText = ({
           return lang('ActionStarGiftPrepaidUpgraded', { user: toLink }, { withNodes: true });
         }
 
-        if (resaleAmount && !transferStars) {
+        // Greengram: a bought gift keeps its transfer fee for the gift sheet
+        if (resaleAmount) {
           const amountText = formatCurrencyAmountAsText(lang, resaleAmount);
 
           return lang(

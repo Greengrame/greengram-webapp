@@ -174,7 +174,7 @@ const GiftMenuItems = ({
       <MenuItem icon="forward" onClick={handleLinkShare}>
         {lang('Share')}
       </MenuItem>
-      {canManage && isGiftUnique && (
+      {canManage && isGiftUnique && !giftResalePrice && (
         <MenuItem icon="diamond" onClick={handleTransfer}>
           {lang('GiftInfoTransfer')}
         </MenuItem>

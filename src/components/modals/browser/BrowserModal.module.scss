@@ -198,6 +198,13 @@
       max-width: 300px;
       max-height: 2.5rem;
     }
+
+    // Greengram: phones can't drag it, so it stayed in the middle of the screen
+    @media (max-width: 600px) {
+      .modal-container {
+        align-items: flex-end;
+      }
+    }
   }
 }
 

@@ -78,12 +78,15 @@ const StarGiftAction = ({
     [lang('ActionStarGiftUniqueSymbol'), pattern.name],
   ], [lang, model, pattern, backdrop]);
 
-  const shouldShowFrom = !isOutgoing || action.isUpgrade;
-  const peer = shouldShowFrom && !action.isUpgrade ? sender : recipient;
+  // Greengram: a sale isn't a gift between the two; the buyer keeps it
+  // ("Saved Gift"), the seller sees who it went to
+  const isResale = Boolean(action.resaleAmount);
+  const shouldShowFrom = (!isOutgoing || action.isUpgrade) && !isResale;
+  const peer = (shouldShowFrom && !action.isUpgrade) || (isResale && !isOutgoing) ? sender : recipient;
 
   const fallbackPeerTitle = lang('ActionFallbackSomeone');
   const peerTitle = peer && getPeerTitle(lang, peer);
-  const isSelf = sender?.id === recipient?.id;
+  const isSelf = sender?.id === recipient?.id || (isResale && isOutgoing);
 
   return (
     <div

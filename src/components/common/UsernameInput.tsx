@@ -25,7 +25,7 @@ type OwnProps = {
   onChange: (value: string) => void;
 };
 
-const LINK_PREFIX_REGEX = /https:\/\/t\.me\/?/i;
+const LINK_PREFIX_REGEX = new RegExp(`^${TME_LINK_PREFIX.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}?`, 'i');
 
 const runDebouncedForCheckUsername = debounce((cb) => cb(), 250, false);
 

@@ -139,6 +139,9 @@ const Reactions = ({
       return;
     }
 
+    // Greengram: star reactions pay the author, you can't pay yourself
+    if (message.isOutgoing) return;
+
     addLocalPaidReaction({
       chatId: message.chatId,
       messageId: message.id,

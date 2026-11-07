@@ -120,6 +120,7 @@ type OwnProps = {
   isPremium?: boolean;
   limits?: NonNullable<GlobalState['appConfig']>['limits'];
   premiumPromoOrder?: ApiPremiumSection[];
+  featureIcons: Record<ApiPremiumSection, string>;
   subscriptionOption?: ApiPremiumSubscriptionOption;
   onBack: VoidFunction;
   onClickSubscribe: (startParam?: string) => void;
@@ -131,6 +132,7 @@ const PremiumFeatureModal = ({
   isPremium,
   limits,
   premiumPromoOrder,
+  featureIcons,
   subscriptionOption,
   onBack,
   onClickSubscribe,
@@ -275,7 +277,7 @@ const PremiumFeatureModal = ({
             return (
               <div className={styles.slide}>
                 <div className={styles.frame}>
-                  <PremiumFeaturePreviewStickers isActive={currentSlideIndex === index} />
+                  <PremiumFeaturePreviewStickers isActive={currentSlideIndex === index} icon={featureIcons.premium_stickers} />
                 </div>
                 <h1 className={styles.title}>
                   {lang(PREMIUM_FEATURE_TITLES.premium_stickers)}
@@ -314,16 +316,24 @@ const PremiumFeatureModal = ({
           const i = promo.videoSections.indexOf(section);
           return (
             <div className={styles.slide}>
-              <div className={styles.frame}>
-                <PremiumFeaturePreviewVideo
-                  isActive={currentSlideIndex === index}
-                  videoId={i !== -1 ? promo.videos[i].id : undefined}
-                  videoThumbnail={i !== -1 ? promo.videos[i].thumbnail : undefined}
-                  isDown={PREMIUM_BOTTOM_VIDEOS.includes(section)}
-                  index={index}
-                  isReverseAnimation={index === reverseAnimationSlideIndex}
-                />
-              </div>
+              {i === -1 ? (
+                // Greengram: no promo videos here, the feature's icon instead
+                // of an empty gray phone
+                <div className={buildClassName(styles.frame, styles.iconFrame)}>
+                  <img src={featureIcons[section]} alt="" className={styles.featureIcon} draggable={false} />
+                </div>
+              ) : (
+                <div className={styles.frame}>
+                  <PremiumFeaturePreviewVideo
+                    isActive={currentSlideIndex === index}
+                    videoId={promo.videos[i].id}
+                    videoThumbnail={promo.videos[i].thumbnail}
+                    isDown={PREMIUM_BOTTOM_VIDEOS.includes(section)}
+                    index={index}
+                    isReverseAnimation={index === reverseAnimationSlideIndex}
+                  />
+                </div>
+              )}
               <h1 className={styles.title}>
                 {lang(PREMIUM_FEATURE_TITLES[section], undefined, { withNodes: true, renderTextFilters: ['br'] })}
               </h1>

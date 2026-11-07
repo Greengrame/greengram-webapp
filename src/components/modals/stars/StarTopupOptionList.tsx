@@ -27,6 +27,7 @@ type OwnProps = {
   selectedStarCount?: number;
   starsNeeded?: number;
   className?: string;
+  formatPrice?: (option: ApiStarTopupOption | ApiStarGiveawayOption) => string;
   onClick: (option: ApiStarTopupOption | ApiStarGiveawayOption) => void;
 };
 
@@ -37,6 +38,7 @@ const StarTopupOptionList = ({
   selectedStarOption,
   selectedStarCount,
   starsNeeded,
+  formatPrice,
   onClick,
 }: OwnProps) => {
   const lang = useLang();
@@ -70,7 +72,8 @@ const StarTopupOptionList = ({
       }
       result.push({
         option,
-        starsCount: Math.min(currentStackedStarsCount, MAX_STARS_COUNT),
+        // Greengram: an extended first tier would count none, every tile gets at least one
+        starsCount: Math.max(1, Math.min(currentStackedStarsCount, MAX_STARS_COUNT)),
         isWide: index === options.length - 1,
       });
     });
@@ -110,7 +113,7 @@ const StarTopupOptionList = ({
               </div>
             </div>
             <div className={styles.optionBottom}>
-              {formatCurrency(lang, option.amount, option.currency)}
+              {formatPrice ? formatPrice(option) : formatCurrency(lang, option.amount, option.currency)}
             </div>
             {(isActiveOption || (selectedStarOption && 'winners' in selectedStarOption))
               && Boolean(perUserStarCount) && (

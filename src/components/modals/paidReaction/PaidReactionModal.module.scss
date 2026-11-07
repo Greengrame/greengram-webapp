@@ -156,3 +156,26 @@
   font-size: 0.875rem;
   color: var(--color-text-secondary);
 }
+
+.customAmountInput {
+  position: relative;
+
+  :global(.input-group) {
+    margin-bottom: 0;
+  }
+
+  :global(.form-control) {
+    padding-left: 2rem;
+  }
+}
+
+.customAmountIcon {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+
+  font-size: 1rem;
+  color: var(--color-star, #ffb727);
+}

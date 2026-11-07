@@ -1128,7 +1128,10 @@ class TelegramClient {
     let size;
     if (args.sizeType) {
       size = this.pickFileSize([...(doc.thumbs || []), ...(doc.videoThumbs || [])], args.sizeType);
-      if (!size && doc.mimeType.startsWith('video/')) {
+      // Greengram: no such thumb means no answer. Falling through would fetch
+      // the whole file and the caller labels it image/jpeg, which is how
+      // .tgs emoji ended up in <img> as broken images
+      if (!size && !doc.mimeType.startsWith('image/')) {
         return undefined;
       }
 

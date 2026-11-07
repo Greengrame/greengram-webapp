@@ -161,12 +161,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const starsModalState = selectTabState(global, tabId).starsGiftModal;
 
         if (starsModalState?.isOpen && inputInvoice.userId === starsModalState.forUserId) {
-          global = updateTabState(global, {
-            starsGiftModal: {
-              ...starsModalState,
-              isCompleted: true,
+          // Greengram: done, like the other gift flows. The list behind would invite a second payment
+          actions.showNotification({
+            message: {
+              key: 'StarsGiftCompleted',
             },
-          }, tabId);
+            tabId,
+          });
+          actions.requestConfetti({ withStars: true, tabId });
+          actions.closeStarsGiftModal({ tabId });
         }
       }
 

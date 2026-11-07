@@ -62,6 +62,12 @@ export type OwnProps = {
   footer?: TeactNode;
   viewportFooter?: TeactNode;
   loadMore?: NoneToVoidFunction;
+  // Greengram: the wallet picker offers only people who can receive a transfer
+  peerFilter?: (id: string) => boolean;
+  // Greengram: server search hits for the current query, drawn after the local ones
+  extraSearchIds?: string[];
+  noResultsText?: string;
+  onSearchChange?: (search: string) => void;
   onSelectRecipient: (peerId: string, threadId?: ThreadId) => void;
   onSelectedIdsChange?: (ids: ChatSelectionKey[]) => void;
   onClose: NoneToVoidFunction;
@@ -106,6 +112,10 @@ const RecipientPicker = ({
   footer,
   viewportFooter,
   loadMore,
+  peerFilter,
+  extraSearchIds,
+  noResultsText,
+  onSearchChange,
   onSelectRecipient,
   onSelectedIdsChange,
   onClose,
@@ -219,7 +229,8 @@ const RecipientPicker = ({
       currentUserId,
     );
 
-    return filterChatIdsByType(global, sorted, filter);
+    const typed = filterChatIdsByType(global, extraSearchIds ? unique([...sorted, ...extraSearchIds]) : sorted, filter);
+    return peerFilter ? typed.filter(peerFilter) : typed;
   }, [
     isOpen,
     pinnedIds,
@@ -233,6 +244,8 @@ const RecipientPicker = ({
     shouldFilterInviteable,
     orderedChatIds,
     shouldRenderFolders,
+    peerFilter,
+    extraSearchIds,
   ]);
 
   const renderingIds = useCurrentOrPrev(ids, true);
@@ -241,8 +254,17 @@ const RecipientPicker = ({
     const global = getGlobal();
     const source = topPeerIds?.length ? topPeerIds : (contactIds || []);
     const allowed = source.filter((id) => getIsRecipientAllowed(global, id, isForwarding, shouldFilterInviteable));
-    return filterChatIdsByType(global, allowed, filter).slice(0, RECENT_CONTACTS_LIMIT);
-  }, [topPeerIds, contactIds, filter, isForwarding, shouldFilterInviteable]);
+    const typed = filterChatIdsByType(global, allowed, filter);
+    return (peerFilter ? typed.filter(peerFilter) : typed).slice(0, RECENT_CONTACTS_LIMIT);
+  }, [topPeerIds, contactIds, filter, isForwarding, shouldFilterInviteable, peerFilter]);
+
+  // ListTopPeers always leads with this id as Saved Messages
+  const topPeersSelfId = currentUserId && (!peerFilter || peerFilter(currentUserId)) ? currentUserId : undefined;
+
+  const handleSearchChange = useLastCallback((value: string) => {
+    setSearch(value);
+    onSearchChange?.(value);
+  });
 
   const hasSelectedChips = isMultiSelect && selectedIds.length > 0;
 
@@ -298,7 +320,7 @@ const RecipientPicker = ({
           <Island className={styles.recentContacts}>
             <ListTopPeers
               peerIds={recentContactIds}
-              currentUserId={currentUserId}
+              currentUserId={topPeersSelfId}
               selectedIds={isMultiSelect ? selectedPeerIds : undefined}
               onPeerClick={handleSelect}
             />
@@ -317,7 +339,7 @@ const RecipientPicker = ({
     recentContactIds,
     search,
     shouldRenderFolders,
-    currentUserId,
+    topPeersSelfId,
     handleSelect,
     isMultiSelect,
     selectedPeerIds,
@@ -341,7 +363,9 @@ const RecipientPicker = ({
       viewportFooter={viewportFooter}
       listActiveKey={activeFolderIndex}
       selectedIds={isMultiSelect ? selectedIds : undefined}
-      onSearchChange={setSearch}
+      usernameSubtitleIds={extraSearchIds}
+      noResultsText={noResultsText}
+      onSearchChange={handleSearchChange}
       loadMore={loadMore}
       onSelectChatOrUser={handleSelect}
       onClose={onClose}

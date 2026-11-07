@@ -18,6 +18,7 @@ import styles from './PremiumFeaturePreviewStickers.module.scss';
 
 type OwnProps = {
   isActive: boolean;
+  icon: string;
 };
 
 type StateProps = {
@@ -105,7 +106,7 @@ const AnimatedCircleSticker = ({
 };
 
 const PremiumFeaturePreviewStickers = ({
-  stickers, isActive,
+  stickers, isActive, icon,
 }: OwnProps & StateProps) => {
   const containerRef = useRef<HTMLDivElement>();
   const [offset, setOffset] = useState(0);
@@ -134,6 +135,15 @@ const PremiumFeaturePreviewStickers = ({
 
     setSize(container.closest('.modal-dialog')!.clientWidth);
   }, []);
+
+  // Greengram: no sets with premium animations yet
+  if (!renderedStickers?.length) {
+    return (
+      <div className={styles.empty}>
+        <img src={icon} alt="" className={styles.icon} draggable={false} />
+      </div>
+    );
+  }
 
   return (
     <div

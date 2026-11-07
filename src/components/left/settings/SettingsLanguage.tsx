@@ -107,10 +107,15 @@ const SettingsLanguage = ({
     const currentLangCode = (window.navigator.language || 'en').toLowerCase();
     const shortLangCode = currentLangCode.substr(0, 2);
 
-    return languages.map(({ langCode, nativeName, name }) => ({
+    return languages.map(({
+      langCode, nativeName, name, stringsCount, translatedCount,
+    }) => ({
       value: langCode,
       label: nativeName,
-      subLabel: name,
+      // Greengram: packs are older than this build, so say how much of the UI is translated
+      subLabel: stringsCount && translatedCount < stringsCount
+        ? `${name} · ${Math.floor((translatedCount / stringsCount) * 100)}%`
+        : name,
       isLoading: langCode === selectedLanguage && isLoading,
     } satisfies ItemPickerOption)).sort((a) => {
       return currentLangCode && (a.value === currentLangCode || a.value === shortLangCode) ? -1 : 0;

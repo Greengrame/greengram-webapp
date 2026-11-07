@@ -113,7 +113,7 @@ const GiftInfoModal = ({
   const lang = useLang();
 
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
-  const [shouldPayInTon, setShouldPayInTon] = useState<boolean>(false);
+  const [shouldPayInTon] = useState<boolean>(false);
   const [giftMessage, setGiftMessage] = useState('');
   const [shouldHideName, setShouldHideName] = useState(true);
 
@@ -294,6 +294,8 @@ const GiftInfoModal = ({
 
   const uniqueGiftTitle = useMemo(() => {
     if (!gift || gift.type !== 'starGiftUnique' || !giftAttributes?.backdrop) return undefined;
+    // Greengram: an offer from the instance has no number until it's bought
+    if (!gift.number) return gift.title;
 
     const numberColor = giftAttributes.backdrop.textColor;
 
@@ -755,12 +757,13 @@ const GiftInfoModal = ({
         ]);
       }
 
+      // Greengram: a collection with no supply limit has a total of 0
       tableData.push([
         lang('GiftInfoAvailability'),
-        lang('GiftInfoIssued', {
+        gift.totalCount ? lang('GiftInfoIssued', {
           issued: gift.issuedCount,
           total: gift.totalCount,
-        }),
+        }) : lang('GiftInfoIssuedUnlimited', { issued: gift.issuedCount }),
       ]);
 
       if (gift.valueAmount && gift.valueCurrency) {
@@ -941,7 +944,7 @@ const GiftInfoModal = ({
             && (
               <p>
                 {lang('GiftBuyConfirmDescription', {
-                  gift: lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }),
+                  gift: uniqueGift.number ? lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }) : uniqueGift.title,
                   stars: confirmPrice?.currency === TON_CURRENCY_CODE
                     ? formatTonAsText(lang, confirmPrice.amount)
                     : formatStarsAsText(lang, confirmPrice.amount),
@@ -955,7 +958,7 @@ const GiftInfoModal = ({
             && (
               <p>
                 {lang('GiftBuyForPeerConfirmDescription', {
-                  gift: lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }),
+                  gift: uniqueGift.number ? lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }) : uniqueGift.title,
                   stars: confirmPrice?.currency === TON_CURRENCY_CODE
                     ? formatTonAsText(lang, confirmPrice.amount)
                     : formatStarsAsText(lang, confirmPrice.amount),
@@ -990,20 +993,7 @@ const GiftInfoModal = ({
               </div>
             </div>
           )}
-          {!uniqueGift.resaleTonOnly && (
-            <>
-              <Checkbox
-                className={styles.checkBox}
-                label={lang('LabelPayInGram')}
-                checked={shouldPayInTon}
-                onCheck={setShouldPayInTon}
-              />
-
-              <div className={styles.checkBoxDescription}>
-                {lang('DescriptionPayInGram')}
-              </div>
-            </>
-          )}
+          {/* Greengram: Stars only, no paying in Gram */}
         </ConfirmDialog>
       )}
       {savedGift && (

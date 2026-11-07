@@ -11,7 +11,7 @@ import { PAID_MESSAGES_PURPOSE, STARS_CURRENCY_CODE, TON_CURRENCY_CODE } from '.
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import { getPeerTitle } from '../../../global/helpers/peers';
-import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
+import { selectChat, selectIsPremiumPurchaseBlocked, selectTabState, selectUser } from '../../../global/selectors';
 import { selectSharedSettings } from '../../../global/selectors/sharedState.ts';
 import buildClassName from '../../../util/buildClassName';
 import { convertTonFromNanos, convertTonToUsd, formatCurrencyAsString } from '../../../util/formatCurrency';
@@ -33,9 +33,9 @@ import TabList, { type TabWithProperties } from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import ParticlesHeader from '../common/ParticlesHeader.tsx';
 import BalanceBlock from './BalanceBlock';
-import StarTopupOptionList from './StarTopupOptionList';
 import StarsSubscriptionItem from './subscription/StarsSubscriptionItem';
 import StarsTransactionItem from './transaction/StarsTransactionItem';
+import WalletStarsPurchase from './WalletStarsPurchase';
 import Island, { IslandDescription, IslandTitle } from '@gili/layout/Island';
 import Modal, {
   ModalCloseButton, ModalHeader, ModalHeaderAction, ModalTitle,
@@ -61,16 +61,18 @@ type StateProps = {
   starsBalanceState?: GlobalState['stars'];
   tonBalanceState?: GlobalState['ton'];
   canBuyPremium?: boolean;
+  isOverPremiumModal?: boolean;
   tonUsdRate?: number;
   animationLevel: AnimationLevel;
 };
 
 const StarsBalanceModal = ({
-  modal, starsBalanceState, tonBalanceState, canBuyPremium, tonUsdRate, animationLevel,
+  modal, starsBalanceState, tonBalanceState, canBuyPremium, isOverPremiumModal, tonUsdRate, animationLevel,
 }: OwnProps & StateProps) => {
   const {
     closeStarsBalanceModal, loadStarsTransactions, loadStarsSubscriptions, openStarsGiftingPickerModal, openInvoice,
     openWalletModal,
+    openChatByUsername,
   } = getActions();
 
   const isTon = modal?.currency === TON_CURRENCY_CODE;
@@ -204,14 +206,11 @@ const StarsBalanceModal = ({
             {lang('TelegramStarsGift')}
           </Button>
         )}
-        {areBuyOptionsShown && starsBalanceState?.topupOptions && (
-          <Island>
-            <StarTopupOptionList
-              starsNeeded={starsNeeded}
-              options={starsBalanceState.topupOptions}
-              onClick={handleBuyStars}
-            />
-          </Island>
+        {areBuyOptionsShown && (
+          <WalletStarsPurchase
+            starsNeeded={starsNeeded}
+            onDone={shouldOpenOnBuy ? closeStarsBalanceModal : hideBuyOptions}
+          />
         )}
         {areBuyOptionsShown && <IslandDescription>{tosText}</IslandDescription>}
       </>
@@ -244,6 +243,9 @@ const StarsBalanceModal = ({
             )}`}
           </div>
         )}
+        <Button pill onClick={handleTonTopUp}>
+          Open Wallet
+        </Button>
       </>
     );
   };
@@ -268,6 +270,11 @@ const StarsBalanceModal = ({
 
   // The wallet's native dialog would cover this modal, so the wallet is closed while it is open. When the wallet
   // opened it, leaving reopens the wallet.
+  const handleTonTopUp = useLastCallback(() => {
+    closeStarsBalanceModal();
+    openChatByUsername({ username: 'wallet', shouldStartMainApp: true });
+  });
+
   const handleClose = useLastCallback(() => {
     closeStarsBalanceModal();
 
@@ -353,7 +360,7 @@ const StarsBalanceModal = ({
       header={header}
       width="slim"
       height="auto"
-      dialogClassName={styles.dialog}
+      dialogClassName={buildClassName(styles.dialog, isOverPremiumModal && styles.overPremium)}
       noContentInlinePadding
       noScrollable
       onClose={handleClose}
@@ -452,6 +459,7 @@ export default memo(withGlobal<OwnProps>(
       starsBalanceState: global.stars,
       tonBalanceState: global.ton,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
+      isOverPremiumModal: Boolean(selectTabState(global).premiumModal?.isOpen),
       tonUsdRate: global.appConfig.tonUsdRate,
       animationLevel: selectSharedSettings(global).animationLevel,
     };

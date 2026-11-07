@@ -53,6 +53,7 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 import Modal from '../../ui/Modal';
 import Spinner from '../../ui/Spinner';
 import Transition from '../../ui/Transition';
+import WalletRecipientPicker, { isWalletWebApp } from './WalletRecipientPicker';
 
 import styles from './WebAppTab.module.scss';
 
@@ -654,8 +655,36 @@ const WebAppTab = ({
     openChatWithInfo({ id: bot!.id });
   });
 
+  const [recipientRequestId, setRecipientRequestId] = useState<string>();
+  const [isRecipientPickerShown, setIsRecipientPickerShown] = useState(false);
+
+  const handleRecipientPickerClosed = useLastCallback(() => setIsRecipientPickerShown(false));
+  const closeRecipientPicker = useLastCallback((userId?: string) => {
+    if (recipientRequestId === undefined) return;
+    sendEvent({
+      eventType: 'greengram_recipient_picker_closed',
+      eventData: { req_id: recipientRequestId, user_id: userId },
+    });
+    setRecipientRequestId(undefined);
+  });
+
   function handleEvent(event: WebAppInboundEvent) {
     const { eventType, eventData } = event;
+
+    // Greengram: only the wallet may ask, the answer hands a user id to the frame
+    if (eventType === 'greengram_recipient_picker_probe' || eventType === 'greengram_recipient_picker_open') {
+      if (!isWalletWebApp(webApp, bot)) return;
+
+      if (eventType === 'greengram_recipient_picker_probe') {
+        sendEvent({ eventType: 'greengram_recipient_picker_available' });
+        return;
+      }
+      if (typeof eventData?.req_id !== 'string') return;
+      closeRecipientPicker();
+      setRecipientRequestId(eventData.req_id);
+      setIsRecipientPickerShown(true);
+      return;
+    }
 
     if (eventType === 'web_app_request_fullscreen') {
       if (!isActive) return;
@@ -679,7 +708,8 @@ const WebAppTab = ({
     if (eventType === 'web_app_open_tg_link') {
       changeBrowserModalState({ state: 'minimized' });
 
-      const linkUrl = TME_LINK_PREFIX + eventData.path_full;
+      // Greengram: Stars have no public link, t.me/stars would look up a username
+      const linkUrl = eventData.path_full === '/stars' ? 'tg://stars' : TME_LINK_PREFIX + eventData.path_full;
       openTelegramLink({ url: linkUrl, shouldIgnoreCache: eventData.force_request });
     }
 
@@ -1277,6 +1307,7 @@ const WebAppTab = ({
               shouldHideSecondaryButton && styles.hidden,
             )}
             fluid
+            noForcedUpperCase
             style={buildStyle(
               `background-color: ${renderingSecondaryButton?.color}`,
               `color: ${renderingSecondaryButton?.textColor}`,
@@ -1300,7 +1331,14 @@ const WebAppTab = ({
               shouldHideMainButton && styles.hidden,
             )}
             fluid
-            style={`background-color: ${renderingMainButton?.color}; color: ${renderingMainButton?.textColor}`}
+            noForcedUpperCase
+            style={buildStyle(
+              `background-color: ${renderingMainButton?.color}`,
+              `color: ${renderingMainButton?.textColor}`,
+              // Greengram: an app that sends its own colours has already drawn the disabled state
+              shouldShowMainButton && !shouldHideMainButton && !renderingMainButton?.isActive
+                && renderingMainButton?.color !== themeParams.button_color && 'opacity: 1 !important',
+            )}
             disabled={!renderingMainButton?.isActive && !renderingMainButton?.isProgressVisible}
             nonInteractive={renderingMainButton?.isProgressVisible}
             isShiny={renderingMainButton?.hasShineEffect && !renderingMainButton?.isProgressVisible}
@@ -1399,6 +1437,14 @@ const WebAppTab = ({
         onClose={handleRejectClipboardText}
         confirmHandler={handleConfirmClipboardText}
       />
+      {isRecipientPickerShown && (
+        <WalletRecipientPicker
+          isOpen={recipientRequestId !== undefined}
+          onSelect={closeRecipientPicker}
+          onClose={closeRecipientPicker}
+          onCloseAnimationEnd={handleRecipientPickerClosed}
+        />
+      )}
     </div>
   );
 };

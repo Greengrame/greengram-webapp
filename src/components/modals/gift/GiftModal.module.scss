@@ -67,10 +67,9 @@
 .resaleStarGiftsContainer,
 .starGiftsContainer,
 .premiumGiftsGallery {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
-  align-items: center;
-  justify-content: center;
 
   margin-bottom: 0.75rem;
 }

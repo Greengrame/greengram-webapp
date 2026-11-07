@@ -3046,7 +3046,9 @@ const Composer = ({
                 slideClassName="composer-action-buttons"
                 activeKey={Number(hasInputContent)}
                 direction="inverse"
-                name="slideFadeAndroid"
+                // Greengram: Firefox never fires animationend here, so every
+                // send held message rendering for the 1s fallback
+                name="none"
               >
                 {!hasInputContent && (
                   <>

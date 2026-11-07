@@ -1085,7 +1085,10 @@ export default memo(withGlobal<OwnProps>(
       isInSavedMessages,
       isChannel,
       canReplyInChat,
-      isWithPaidReaction: !message.isEphemeral && chatFullInfo?.isPaidReactionAvailable,
+      // Greengram: the Stars go to the author, so not on your own messages or a bot's;
+      // private chats have them too
+      isWithPaidReaction: !message.isEphemeral && !isOwn && !isBot && !isInSavedMessages
+        && (isPrivate || chatFullInfo?.isPaidReactionAvailable),
       poll,
       story,
       user,

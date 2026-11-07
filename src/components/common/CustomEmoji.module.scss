@@ -37,6 +37,10 @@
   height: var(--custom-emoji-size) !important;
 }
 
+.media, .thumb {
+  object-fit: contain;
+}
+
 .root, .media, .thumb {
   border-radius: var(--custom-emoji-border-radius) !important;
 }

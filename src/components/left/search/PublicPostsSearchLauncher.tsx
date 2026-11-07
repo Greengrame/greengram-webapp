@@ -7,7 +7,6 @@ import {
   PUBLIC_POSTS_SEARCH_DEFAULT_STARS_AMOUNT,
   PUBLIC_POSTS_SEARCH_DEFAULT_TOTAL_DAILY,
 } from '../../../config';
-import { selectIsCurrentUserPremium } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 import { throttle } from '../../../util/schedulers';
@@ -280,6 +279,7 @@ const PublicPostsSearchLauncher = ({
 };
 
 export default memo(withGlobal<OwnProps>((global): Complete<StateProps> => ({
-  isCurrentUserPremium: selectIsCurrentUserPremium(global),
+  // Greengram: public post search is open to everyone, no Premium upsell
+  isCurrentUserPremium: true,
   starsBalance: global.stars?.balance?.amount || 0,
 }))(PublicPostsSearchLauncher));

@@ -11,7 +11,6 @@ import {
   ANIMATION_LEVEL_MIN,
   ARCHIVED_FOLDER_ID,
   BETA_CHANGELOG_URL,
-  FEEDBACK_URL,
   IS_BETA,
   IS_TEST,
   PRODUCTION_HOSTNAME,
@@ -93,7 +92,6 @@ const LeftSideMenuItems = ({
     setSharedSettingOption,
     updatePerformanceSettings,
     openChatByUsername,
-    openUrl,
     openChatWithInfo,
     openSettingsScreen,
     openWalletModal,
@@ -168,11 +166,11 @@ const LeftSideMenuItems = ({
   });
 
   const handleOpenTipsChat = useLastCallback(() => {
-    openChatByUsername({ username: lang('TelegramFeaturesUsername') });
+    openChatByUsername({ username: 'bugsbot', shouldStartMainApp: true, startApp: 'suggestions' });
   });
 
   const handleBugReportClick = useLastCallback(() => {
-    openUrl({ url: FEEDBACK_URL });
+    openChatByUsername({ username: 'bugsbot', shouldStartMainApp: true });
   });
 
   return (

@@ -343,9 +343,15 @@ export const SUPPORTED_TRANSLATION_LANGUAGES = [
 export const RE_LINK_TEMPLATE = '((ftp|https?):\\/\\/)?((www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z][-a-zA-Z0-9]{1,62})\\b([-a-zA-Z0-9()@:%_+.,~#?&/=]*)';
 export const RE_MENTION_TEMPLATE = '(@[\\w\\d_-]+)';
 export const RE_TG_LINK = /^tg:(\/\/)?/i;
-export const RE_TME_LINK = /^(https?:\/\/)?(?:([-a-zA-Z0-9@:%_+~#=]{1,32}\.)?t\.me|telegram\.(?:me|dog))(?=[:/?#]|$)/i;
+// Greengram: this instance's own links count as t.me links, except the pages it serves itself
+const INSTANCE_LINK = `${self.location.host.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`
+  + '(?!/(?:admin|login|fragment|username|number|wallet|stickers|botfather|bots|premium|link|api|m|__greengram|__miniapps)(?:[/?#]|$))';
+export const RE_TME_LINK = new RegExp(
+  `^(https?:\\/\\/)?(?:([-a-zA-Z0-9@:%_+~#=]{1,32}\\.)?t\\.me|telegram\\.(?:me|dog)|${INSTANCE_LINK})(?=[:/?#]|$)`,
+  'i',
+);
 export const RE_TELEGRAM_LINK = /^(https?:\/\/)?telegram\.org\//i;
-export const TME_LINK_PREFIX = 'https://t.me/';
+export const TME_LINK_PREFIX = `${self.location.origin}/`;
 export const BOT_FATHER_USERNAME = 'botfather';
 // Gram Wallet
 export const WALLET_BOT_USERNAME = 'walt';
@@ -374,7 +380,7 @@ export const MESSAGE_ID_REQUIRED_ERROR = 'MESSAGE_ID_REQUIRED';
 export const PURCHASE_USERNAME = 'auction';
 export const ACCEPTABLE_USERNAME_ERRORS = new Set([USERNAME_PURCHASE_ERROR, 'USERNAME_INVALID']);
 export const TME_WEB_DOMAINS = new Set([
-  't.me', 'telegram.me', 'telegram.dog', 'web.t.me', 'a.t.me', 'k.t.me', 'z.t.me',
+  't.me', 'telegram.me', 'telegram.dog', 'web.t.me', 'a.t.me', 'k.t.me', 'z.t.me', self.location.hostname,
 ]);
 export const WEB_APP_PLATFORM = 'weba';
 export const LANG_PACK = 'weba';

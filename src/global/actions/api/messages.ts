@@ -50,7 +50,7 @@ import {
 import { ensureProtocol } from '../../../util/browser/url';
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import { copyTextToClipboardFromPromise } from '../../../util/clipboard';
-import { isDeepLink } from '../../../util/deepLinkParser';
+import { instanceLinkToDeepLink, isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
 import {
@@ -2333,6 +2333,12 @@ async function loadViewportMessages<T extends GlobalState>(
     }
   }
 
+  // Greengram: the dialog from requestChatUpdate can land after this answer.
+  // Without a thread the ids below are dropped and the chat spins for good.
+  if (threadId === MAIN_THREAD_ID && !selectThreadInfo(global, chatId, threadId)) {
+    global = updateThreadInfo(global, { isCommentsInfo: false, chatId, threadId });
+  }
+
   global = addChatMessagesById(global, chatId, byId);
   global = isOutlying
     ? updateOutlyingLists(global, chatId, threadId, ids)
@@ -3091,6 +3097,15 @@ addActionHandler('openUrl', async (global, actions, payload): Promise<void> => {
   } = payload;
   const urlWithProtocol = ensureProtocol(url);
   const parsedUrl = new URL(urlWithProtocol);
+
+  const instanceLink = !ignoreDeepLinks && instanceLinkToDeepLink(urlWithProtocol);
+  if (instanceLink) {
+    actions.closeStoryViewer({ tabId });
+    actions.closePaymentModal({ tabId });
+
+    actions.openTelegramLink({ url: instanceLink, linkContext, tabId });
+    return;
+  }
 
   if (!ignoreDeepLinks && isDeepLink(urlWithProtocol)) {
     actions.closeStoryViewer({ tabId });

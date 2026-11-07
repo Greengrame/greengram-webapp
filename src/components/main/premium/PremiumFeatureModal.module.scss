@@ -41,6 +41,18 @@
   aspect-ratio: 1;
 }
 
+.iconFrame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.featureIcon {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 1.75rem;
+}
+
 .slide {
   scroll-snap-align: center;
   scroll-snap-stop: always;

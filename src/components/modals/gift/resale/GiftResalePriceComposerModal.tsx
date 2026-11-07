@@ -20,7 +20,6 @@ import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 import Button from '../../../ui/Button';
-import Checkbox from '../../../ui/Checkbox';
 import InputText from '../../../ui/InputText';
 import Modal from '../../../ui/Modal';
 
@@ -55,7 +54,7 @@ const GiftResalePriceComposerModal = ({
   const isOpen = Boolean(modal);
   // Kept as typed, so that a price in Grams turns into nanotons without a float in between
   const [priceText, setPriceText] = useState('');
-  const [isPriceInTon, setIsPriceInTon] = useState(false);
+  const [isPriceInTon] = useState(false);
 
   const renderingModal = useCurrentOrPrev(modal);
   const { gift: typeGift } = renderingModal || {};
@@ -167,16 +166,7 @@ const GiftResalePriceComposerModal = ({
         )}
       </div>
 
-      <Checkbox
-        className={styles.checkBox}
-        label={lang('OnlyAcceptGram')}
-        checked={isPriceInTon}
-        onCheck={setIsPriceInTon}
-      />
-
-      <div className={styles.checkBoxDescription}>
-        {lang('OnlyAcceptGramDescription')}
-      </div>
+      {/* Greengram: listings are in Stars only */}
 
       <Button inline noForcedUpperCase disabled={!isPriceCorrect} onClick={handleSellGift}>
         {isPriceCorrect && lang('ButtonSellGift', {

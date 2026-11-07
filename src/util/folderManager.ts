@@ -267,6 +267,9 @@ export function updateFolderManager(global: GlobalState) {
     affectedFolderIds = affectedFolderIds.concat(
       updateFullyLoaded(global, isArchivedFullyLoadedChanged, isSavedFolderFullyLoadedChanged),
     );
+    // Greengram: an account can have no chats at all, and then no chat ever
+    // marks the All folder as affected, so its list stayed on the spinner.
+    if (isAllFullyLoadedChanged) affectedFolderIds.push(ALL_FOLDER_ID);
   }
 
   if (!(

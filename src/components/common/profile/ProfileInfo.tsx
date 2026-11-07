@@ -19,7 +19,7 @@ import { MediaViewerOrigin } from '../../../types/index';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config.ts';
 import {
-  getUserStatus, isAnonymousForwardsChat, isChatChannel, isSystemBot, isUserOnline,
+  getUserStatus, isAnonymousForwardsChat, isChatChannel, isSystemBot, isUserBot, isUserOnline,
 } from '../../../global/helpers/index';
 import { getActions, withGlobal } from '../../../global/index';
 import {
@@ -44,6 +44,7 @@ import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
+import { parseTonToNanos } from '../../../util/formatCurrency';
 import { formatTonShortParts } from '../../../util/localization/format';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { resolveTransitionName } from '../../../util/resolveTransitionName';
@@ -157,10 +158,32 @@ const ProfileInfo = ({
     openProfileRatingModal,
     loadPeerSavedGifts,
     openWalletCardModal,
+    openWalletModal,
   } = getActions();
 
+  // Greengram: MTProto has no field for the GRAM balance, the server answers over HTTP. No amount at zero.
+  const [gramBalance, setGramBalance] = useState<bigint | undefined>();
+  const gramUserId = user && !isUserBot(user) ? user.id : undefined;
+  useEffect(() => {
+    setGramBalance(undefined);
+    if (!gramUserId) return undefined;
+    let isStale = false;
+    const slot = new URLSearchParams(self.location.search).get('account');
+    fetch(`/api/profile/${gramUserId}/gram`, {
+      credentials: 'same-origin',
+      headers: slot ? { 'X-Greengram-Account': slot } : undefined,
+    })
+      .then((response) => (response.ok ? response.json() : undefined))
+      .then((result) => {
+        if (!isStale) setGramBalance(result?.amount ? parseTonToNanos(String(result.amount)) : undefined);
+      })
+      .catch(() => undefined);
+    return () => { isStale = true; };
+  }, [gramUserId]);
+
   const savedMusic = userFullInfo?.savedMusic;
-  const walletBalance = userFullInfo?.walletCard?.balance;
+  const walletCard = userFullInfo?.walletCard;
+  const walletBalance = walletCard?.balance ?? gramBalance;
   // Not in Saved Messages or the settings, which also show the current user
   const hasWalletBalance = Boolean(user && (!user.isSelf || isOwnProfile) && walletBalance !== undefined
     && walletBalance >= MIN_SHOWN_WALLET_NANOS);
@@ -266,7 +289,12 @@ const ProfileInfo = ({
   });
 
   const handleWalletBalanceClick = useLastCallback(() => {
-    openWalletCardModal({ userId: user!.id });
+    // Greengram: no wallet card without a TON address, so the chip opens the wallet itself
+    if (walletCard) {
+      openWalletCardModal({ userId: user!.id });
+    } else {
+      openWalletModal();
+    }
   });
 
   const handleStatusClick = useLastCallback(() => {

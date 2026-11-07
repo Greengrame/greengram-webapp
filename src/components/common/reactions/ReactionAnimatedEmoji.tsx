@@ -99,7 +99,8 @@ const ReactionAnimatedEmoji = ({
       return assignedEffectId;
     }
 
-    if (!genericEffects?.stickers) {
+    // Greengram: an instance without imported effects answers with an empty set
+    if (!genericEffects?.stickers?.length) {
       return undefined;
     }
 

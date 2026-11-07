@@ -33,3 +33,16 @@
     height: 100% !important;
   }
 }
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.icon {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 1.75rem;
+}

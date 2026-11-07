@@ -3376,6 +3376,9 @@ export interface LangPair {
   'SettingsKeywordsLastSeen': undefined;
   'SettingsKeywordsLogOut': undefined;
   'SettingsSearchEmpty': undefined;
+  'ActionWalletTransferDescription': undefined;
+  'WalletRecipientEmpty': undefined;
+  'WalletRecipientNotFound': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -5629,6 +5632,16 @@ export interface LangPairWithVariables<V = LangVariable> {
   'PeerPickerUnknownPeer': {
     'id': V;
   };
+  'ActionWalletTransferText': {
+    'from': V;
+    'amount': V;
+  };
+  'ActionWalletTransferTextYou': {
+    'amount': V;
+  };
+  'GiftInfoIssuedUnlimited': {
+    'issued': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -6906,7 +6919,8 @@ export interface LangKeyGroups {
       | 'WalletAlsoHaveEarnings'
       | 'WalletConnectFee'
       | 'NotificationStarsGiftSentYou'
-      | 'PricePerMonth';
+      | 'PricePerMonth'
+      | 'ActionWalletTransferTextYou';
     variables: 'amount';
   };
   'chat,user': {
@@ -7064,6 +7078,11 @@ export interface LangKeyGroups {
     keys:
       | 'GiftInfoIssued';
     variables: 'issued' | 'total';
+  };
+  'issued': {
+    keys:
+      | 'GiftInfoIssuedUnlimited';
+    variables: 'issued';
   };
   'number': {
     keys:
@@ -7293,7 +7312,8 @@ export interface LangKeyGroups {
       | 'ActionGramTransferPreview'
       | 'ActionGramTransferPreviewYou'
       | 'ActionGiveawayStarsStartedGroup'
-      | 'ActionGiveawayStarsStarted';
+      | 'ActionGiveawayStarsStarted'
+      | 'ActionWalletTransferText';
     variables: 'amount' | 'from';
   };
   'amount,worth': {
