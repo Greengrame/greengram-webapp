@@ -31,6 +31,7 @@ import Photo from './Photo';
 import Video from './Video';
 import WebPageStarGiftAuction from './WebPageStarGiftAuction';
 import WebPageUniqueGift from './WebPageUniqueGift';
+import Widget from './Widget';
 
 import './WebPage.scss';
 
@@ -214,6 +215,10 @@ const WebPage = ({
         {quickButtonTitle}
       </Button>
     );
+  }
+
+  if (fullWebPage?.url?.startsWith(`${window.location.origin}/__greengram/widgets/`)) {
+    return <Widget url={fullWebPage.url} />;
   }
 
   return (

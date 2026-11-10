@@ -684,6 +684,11 @@ export type TabState = {
     botId: string;
   };
 
+  createManagedBotModal?: {
+    botId: string; chatId: string; messageId: number; buttonId: number;
+    suggestedName?: string; suggestedUsername?: string; isCreating?: boolean;
+  };
+
   requestPeerModal?: {
     botId: string;
     chatId: string;

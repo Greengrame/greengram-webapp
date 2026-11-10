@@ -3321,6 +3321,12 @@ export interface LangPair {
   'GroupCallsUnsupported': undefined;
   'MiniAppQrScanUnsupported': undefined;
   'PageTitleInactive': undefined;
+  'ManagedBotCreateTitle': undefined;
+  'ManagedBotCreateInfo': undefined;
+  'ManagedBotName': undefined;
+  'ManagedBotUsername': undefined;
+  'ManagedBotCreateAction': undefined;
+  'WidgetStopped': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -5517,6 +5523,17 @@ export interface LangPairWithVariables<V = LangVariable> {
   };
   'PeerPickerUnknownPeer': {
     'id': V;
+  };
+  'WidgetWalletShareCard': {
+    'bot': V;
+  };
+  'WidgetWalletSend': {
+    'bot': V;
+    'details': V;
+  };
+  'WidgetWalletSign': {
+    'bot': V;
+    'text': V;
   };
 }
 

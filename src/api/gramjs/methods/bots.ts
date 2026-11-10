@@ -41,6 +41,7 @@ import {
   addDocumentToLocalDb,
   addInlineBotRepairInfo,
   addPhotoToLocalDb,
+  addUserToLocalDb,
   addWebDocumentToLocalDb,
 } from '../helpers/localDb';
 import { deserializeBytes } from '../helpers/misc';
@@ -762,4 +763,16 @@ async function invokeUrlAuthRequest(
     }
     throw err;
   }
+}
+
+export async function createManagedBot(
+  { manager, name, username }: { manager: ApiUser; name: string; username: string },
+) {
+  const request = new GramJs.bots.CreateBot({
+    managerId: buildInputUser(manager.id, manager.accessHash), name, username,
+  });
+  const result = await invokeRequest(request);
+  if (!result) return undefined;
+  addUserToLocalDb(result);
+  return buildApiUser(result);
 }

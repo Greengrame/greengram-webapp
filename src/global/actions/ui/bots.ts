@@ -329,3 +329,13 @@ addActionHandler('closeRequestPeerModal', (global, actions, payload): ActionRetu
     requestPeerModal: undefined,
   }, tabId);
 });
+
+addActionHandler('openCreateManagedBotModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId(), ...modal } = payload;
+  return updateTabState(global, { createManagedBotModal: modal }, tabId);
+});
+
+addActionHandler('closeCreateManagedBotModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, { createManagedBotModal: undefined }, tabId);
+});

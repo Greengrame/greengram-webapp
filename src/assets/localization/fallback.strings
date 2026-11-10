@@ -4439,3 +4439,12 @@
 "PageTitleInactive" = "[Inactive]";
 "PageTitleNotifications_one" = "{count} notification";
 "PageTitleNotifications_other" = "{count} notifications";
+"WidgetWalletShareCard" = "Create a public local GRAM wallet card and share it with {bot}?";
+"WidgetWalletSend" = "Allow {bot} to request these local GRAM transfers?\n{details}";
+"WidgetWalletSign" = "Allow {bot} to sign this data with your local GRAM wallet?\n{text}";
+"ManagedBotCreateTitle" = "Create a managed bot";
+"ManagedBotCreateInfo" = "The requesting bot will receive access to your new bot's token and can operate it. You remain the owner.";
+"ManagedBotName" = "Bot name";
+"ManagedBotUsername" = "Bot username";
+"ManagedBotCreateAction" = "Create and share bot";
+"WidgetStopped" = "Widget stopped";

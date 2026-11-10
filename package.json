@@ -143,6 +143,7 @@
     "music-metadata": "^12.1.1",
     "opus-recorder": "github:Ajaxy/opus-recorder#116830a94120baad5ac60ac060c2ecd032b6107b",
     "qr-code-styling": "^1.9.2",
+    "quickjs-emscripten": "0.32.0",
     "temml": "^0.14.0",
     "tweetnacl": "1.0.3"
   },

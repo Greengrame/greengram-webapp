@@ -1,0 +1,14 @@
+.Widget {
+  contain: layout paint style;
+  overflow: hidden;
+
+  min-width: 12.5rem;
+  max-width: 100%;
+  min-height: 3.125rem;
+  max-height: 37.5rem;
+}
+
+.Widget-wallet-summary {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}

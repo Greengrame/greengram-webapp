@@ -229,6 +229,11 @@ export default defineConfig(
     },
   },
   {
+    name: 'widget-declarations',
+    files: ['src/lib/widgets/*.ts', 'src/components/middle/message/Widget.tsx'],
+    rules: { 'prefer-const': 'off' },
+  },
+  {
     name: 'global-state-json',
     // Global state may hold `bigint`: plain `JSON.stringify` throws on it, and plain `JSON.parse` cannot restore it
     files: ['src/global/cache.ts', 'src/global/actions/api/passcode.ts', 'src/util/init.ts'],

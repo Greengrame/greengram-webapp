@@ -2757,6 +2757,12 @@ export interface ActionPayloads {
   refreshLangPackFromCache: {
     langCode: string;
   };
+  openCreateManagedBotModal: {
+    botId: string; chatId: string; messageId: number; buttonId: number;
+    suggestedName?: string; suggestedUsername?: string;
+  } & WithTabId;
+  closeCreateManagedBotModal: WithTabId | undefined;
+  createManagedBot: { name: string; username: string } & WithTabId;
   openRequestPeerModal: {
     botId: string;
     chatId: string;

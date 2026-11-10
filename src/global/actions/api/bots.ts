@@ -1,13 +1,14 @@
 import type { InlineBotSettings, ThreadId } from '../../../types';
 import type { WebApp } from '../../../types/webapp';
 import type {
-  ActionReturnType, GlobalState, TabArgs,
+  ActionReturnType, GlobalState, TabArgs, TabState,
 } from '../../types';
 import {
   type ApiChat,
   type ApiInputMessageReplyInfo,
   type ApiPeer,
   type ApiUrlAuthResult,
+  type ApiUser,
   MAIN_THREAD_ID,
 } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
@@ -177,6 +178,14 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       break;
     }
 
+    case 'createManagedBot': {
+      actions.openCreateManagedBotModal({
+        botId: message.senderId || chatId, chatId, messageId: message.id,
+        buttonId: button.action.buttonId, suggestedName: button.action.suggestedName,
+        suggestedUsername: button.action.suggestedUsername, tabId,
+      });
+      break;
+    }
     case 'requestPeer': {
       const { buttonId, maxQuantity, peerType } = button.action;
       const botId = message.senderId || chatId;
@@ -1791,4 +1800,39 @@ addActionHandler('sendBotRequestedPeer', async (global, actions, payload): Promi
     buttonId,
     requestedPeers,
   });
+});
+
+addActionHandler('createManagedBot', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId(), name, username } = payload;
+  const modal = selectTabState(global, tabId).createManagedBotModal;
+  const manager = modal ? selectUser(global, modal.botId) : undefined;
+  const chat = modal ? selectChat(global, modal.chatId) : undefined;
+  let created: ApiUser | undefined;
+  let hasShared: boolean | undefined;
+  let activeModal: TabState['createManagedBotModal'];
+  if (!modal || !manager || !chat || modal.isCreating) return;
+  global = updateTabState(global, { createManagedBotModal: { ...modal, isCreating: true } }, tabId);
+  setGlobal(global);
+  try {
+    created = await callApi('createManagedBot', { manager, name, username });
+    if (!created) return;
+    global = getGlobal();
+    global = updateUser(global, created.id, created);
+    setGlobal(global);
+    hasShared = await callApi('sendBotRequestedPeer', {
+      chat, messageId: modal.messageId, buttonId: modal.buttonId, requestedPeers: [created],
+    });
+    global = getGlobal();
+    activeModal = selectTabState(global, tabId).createManagedBotModal;
+    if (hasShared && activeModal?.botId === modal.botId && activeModal?.messageId === modal.messageId) {
+      actions.closeCreateManagedBotModal({ tabId });
+    }
+  } finally {
+    global = getGlobal();
+    activeModal = selectTabState(global, tabId).createManagedBotModal;
+    if (activeModal?.isCreating && activeModal.botId === modal.botId && activeModal.messageId === modal.messageId) {
+      global = updateTabState(global, { createManagedBotModal: { ...activeModal, isCreating: false } }, tabId);
+      setGlobal(global);
+    }
+  }
 });

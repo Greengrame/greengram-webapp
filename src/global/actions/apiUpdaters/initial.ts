@@ -187,13 +187,6 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
 
       setGlobal(global);
       break;
-    case 'authorizationStateWaitQrCode':
-      global = updateAuth(global, {
-        isLoadingQrCode: false,
-        qrCode: update.qrCode,
-      });
-      setGlobal(global);
-      break;
     case 'authorizationStateReady': {
       sessionStorage.removeItem('greengram-login-redirect');
       if (wasAuthReady) {

@@ -341,6 +341,7 @@
     "channels.checkSearchPostsFlood",
     "channels.toggleAutotranslation",
     "channels.setMainProfileTab",
+    "bots.createBot",
     "bots.getBotRecommendations",
     "bots.canSendMessage",
     "bots.allowSendMessage",

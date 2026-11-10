@@ -98,7 +98,7 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
 
   const {
     userAgent, platform, sessionData, isWebmSupported, maxBufferSize, webAuthToken, dcId,
-    mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
+    mockScenario,
     shouldDebugExportedSenders, langCode, isTestServerRequested, accountIds,
     hasPasskeySupport, webAuthUserId,
   } = initialArgs;

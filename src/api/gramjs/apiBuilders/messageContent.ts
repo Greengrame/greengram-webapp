@@ -180,6 +180,8 @@ export function buildMessageMediaContent(
     return buildMessageMediaContent(media.extendedMedia.media, context);
   }
 
+  if (media instanceof GramJs.MessageMediaPhoto && media.livePhoto) return buildLivePhotoContent(media);
+
   const sticker = buildSticker(media);
   if (sticker) return { sticker };
 
@@ -962,4 +964,12 @@ export function buildBoughtMediaContent(
   }
 
   return boughtMedia;
+}
+
+function buildLivePhotoContent(media: GramJs.MessageMediaPhoto): MediaContent | undefined {
+  const document = media.video instanceof GramJs.Document ? media.video : undefined;
+  const video = document && buildApiVideoFromDocument(document, undefined, { isSpoiler: media.spoiler });
+  const photo = buildPhoto(media);
+  if (video) return { video: { ...video, noSound: true } };
+  return photo ? { photo } : undefined;
 }

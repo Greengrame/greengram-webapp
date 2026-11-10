@@ -4,6 +4,7 @@
 // from that origin, so pinning buys nothing extra here.
 
 import { SERVER_KEYS } from './crypto/RSA';
+
 import { readBigIntFromBuffer } from './Helpers';
 
 type Discovery = { dc: number; publicKey: string; fingerprint: string };
@@ -55,7 +56,9 @@ export function loadGreengramInstance() {
       SERVER_KEYS.set(BigInt(doc.fingerprint), parsePKCS1(doc.publicKey));
       return doc;
     })();
-    instance.catch(() => { instance = undefined; });
+    instance.catch(() => {
+      instance = undefined;
+    });
   }
   return instance;
 }

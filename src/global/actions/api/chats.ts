@@ -1962,7 +1962,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
     }
 
     if (startAttach === undefined && messageId && !startParam && !ref
-      && chat?.usernames?.some((c) => c.username === username)) {
+      && !chat?.isBotForum && chat?.usernames?.some((c) => c.username === username)) {
       actions.focusMessage({
         chatId: chat.id, threadId, messageId, timestamp, tabId,
       });
@@ -4158,7 +4158,7 @@ async function openChatWithParams<T extends GlobalState>(
   if (messageId) {
     let isTopicProcessed = false;
     // In forums, link to a topic start message should open the topic
-    if (chat.isForum && !threadId) {
+    if ((chat.isForum || chat.isBotForum) && !threadId) {
       let topic = selectTopics(global, chat.id)?.[messageId];
       if (!topic) {
         const topicResult = await callApi('fetchTopicById', { chat, topicId: messageId });

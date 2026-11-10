@@ -14,7 +14,6 @@ import {
 } from '../global/selectors';
 import { IS_TAURI } from '../util/browser/globalEnvironment';
 import { IS_INSTALL_PROMPT_SUPPORTED, PLATFORM_ENV } from '../util/browser/windowEnvironment';
-import buildClassName from '../util/buildClassName';
 import { setupBeforeInstallPrompt } from '../util/installPrompt';
 import { ACCOUNT_SLOT, getAccountSlotUrl, getFirstLoggedInAccountSlot } from '../util/multiaccount';
 import { hasLegacyEncryptedSession } from '../util/passcode';
@@ -30,7 +29,6 @@ import useFileHoverOpen, {
   FILE_HOVER_OPEN_SELECTOR, hasFiles,
 } from '../hooks/useFileHoverOpen';
 import useLang from '../hooks/useLang';
-import usePrevious from '../hooks/usePrevious';
 import { useSignalEffect } from '../hooks/useSignalEffect';
 import { getIsInBackground } from '../hooks/window/useBackgroundMode';
 
@@ -51,7 +49,6 @@ type StateProps = {
   hasPasscode?: boolean;
   inactiveReason?: 'auth' | 'otherClient';
   hasWebAuthTokenFailed?: boolean;
-  isTestServer?: boolean;
   theme: ThemeKey;
   customBackgroundColor?: string;
   actionMessageBg?: string;
@@ -73,7 +70,6 @@ const App = ({
   hasPasscode,
   inactiveReason,
   hasWebAuthTokenFailed,
-  isTestServer,
   theme,
   customBackgroundColor,
   actionMessageBg,
@@ -210,8 +206,6 @@ const App = ({
     }
   }, [inactiveReason, lang]);
 
-  const prevActiveKey = usePrevious(activeKey);
-
   function renderContent() {
     switch (activeKey) {
       case AppScreens.auth:
@@ -265,15 +259,11 @@ const App = ({
         name="fade"
         activeKey={activeKey}
         shouldCleanup
-        className={buildClassName(
-          'full-height',
-          (activeKey === AppScreens.auth || prevActiveKey === AppScreens.auth) && 'is-auth',
-        )}
+        className="full-height"
         renderCount={TRANSITION_RENDER_COUNT}
       >
         {renderContent}
       </Transition>
-      {activeKey === AppScreens.auth && isTestServer && <div className="test-server-badge">{lang('TestServer')}</div>}
       <Notifications />
     </UiLoader>
   );
@@ -293,7 +283,6 @@ export default withGlobal(
       hasWebAuthTokenFailed: hasWebAuthTokenFailed || hasWebAuthTokenPasswordRequired,
       theme,
       customBackgroundColor: getWallpaperBaseColor(theme, themeValues || {}),
-      isTestServer: global.config?.isTestServer,
       actionMessageBg: selectActionMessageBg(global),
     };
   },

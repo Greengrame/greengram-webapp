@@ -61,6 +61,10 @@ export function addMediaToLocalDb(media: GramJs.TypeMessageMedia, context?: Medi
     addPhotoToLocalDb(photo);
   }
 
+  if (media instanceof GramJs.MessageMediaPhoto && media.video) {
+    addDocumentToLocalDb(addMessageRepairInfo(media.video, context));
+  }
+
   if (media instanceof GramJs.MessageMediaPhoto && media.photo) {
     const photo = addMessageRepairInfo(media.photo, context);
     addPhotoToLocalDb(photo);

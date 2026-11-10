@@ -11,9 +11,9 @@ import { buildInputPasskeyCredential } from '../../../api/gramjs/gramjsBuilders/
 import {
   PasskeyCredentialNotFoundError, PasskeyLoginRequestedError, RPCError, UserAlreadyAuthorizedError,
 } from '../errors';
+import { greengramWebToken } from '../greengram';
 import Api from '../tl/api';
 
-import { greengramWebToken } from '../greengram';
 import { sleep } from '../Helpers';
 import { computeCheck as computePasswordSrpCheck } from '../Password';
 import { getDisplayName } from '../Utils';

@@ -11,6 +11,12 @@ export function buildApiReplyButtonAction(type: GramJs.TypeButtonType): ApiReply
   if (type instanceof GramJs.ButtonTypeRequestPhone) return { type: 'requestPhone' };
   if (type instanceof GramJs.ButtonTypeRequestPoll) return { type: 'requestPoll', isQuiz: type.quiz };
   if (type instanceof GramJs.ButtonTypeSimpleWebView) return { type: 'simpleWebView', url: type.url };
+  if (type instanceof GramJs.ButtonTypeRequestPeer && type.peerType instanceof GramJs.RequestPeerTypeCreateBot) {
+    return {
+      type: 'createManagedBot', buttonId: type.buttonId,
+      suggestedName: type.peerType.suggestedName, suggestedUsername: type.peerType.suggestedUsername,
+    };
+  }
   if (type instanceof GramJs.ButtonTypeRequestPeer) {
     const peerType = buildApiRequestPeerType(type.peerType);
     if (peerType) {

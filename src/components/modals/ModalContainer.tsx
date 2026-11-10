@@ -26,6 +26,7 @@ import ChatInviteModal from './chatInvite/ChatInviteModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
 import CocoonModal from './cocoon/CocoonModal.async';
 import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
+import CreateManagedBotModal from './CreateManagedBotModal';
 import DeleteAccountModal from './deleteAccount/DeleteAccountModal.async';
 import DeleteMemberModal from './deleteMember/DeleteMemberModal.async';
 import DisableSharingAboutModal from './disableSharing/DisableSharingAboutModal.async';
@@ -148,6 +149,7 @@ type ModalKey = keyof Pick<TabState,
   'giftWithdrawModal' |
   'preparedMessageModal' |
   'sharePreparedMessageModal' |
+  'createManagedBotModal' |
   'requestPeerModal' |
   'giftStatusInfoModal' |
   'giftTransferModal' |
@@ -294,6 +296,7 @@ const LEGACY_MODALS: LegacyModalRegistry = {
   giftStatusInfoModal: GiftStatusInfoModal,
   preparedMessageModal: PreparedMessageModal,
   sharePreparedMessageModal: SharePreparedMessageModal,
+  createManagedBotModal: CreateManagedBotModal,
   requestPeerModal: RequestPeerModal,
   giftTransferModal: GiftTransferModal,
   giftTransferConfirmModal: GiftTransferConfirmModal,

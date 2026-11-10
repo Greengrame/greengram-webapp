@@ -1053,7 +1053,8 @@ export type ApiReplyButtonAction =
   { type: 'command' | 'requestPhone' | 'unsupported' }
   | { type: 'requestPoll'; isQuiz?: boolean }
   | { type: 'requestPeer'; buttonId: number; maxQuantity: number; peerType: ApiRequestPeerType }
-  | { type: 'simpleWebView'; url: string };
+  | { type: 'simpleWebView'; url: string }
+  | { type: 'createManagedBot'; buttonId: number; suggestedName?: string; suggestedUsername?: string };
 
 export type ApiInlineButtonAction =
   { type: 'buy' | 'game' | 'disabled' | 'unsupported' }
